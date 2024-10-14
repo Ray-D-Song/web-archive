@@ -4,7 +4,7 @@ import type { D1Database } from '@cloudflare/workers-types/experimental'
 import { isNotNil, isNumberString } from '@web-archive/shared/utils'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
-import { Page } from '~/sql/types'
+import type { Page } from '~/sql/types'
 
 const app = new Hono<HonoTypeUserInformation>()
 

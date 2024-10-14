@@ -1,6 +1,6 @@
 import { Button } from '@web-archive/shared/components/button'
 import { House, LogOut } from 'lucide-react'
-import { PageType } from 'popup/PopupPage'
+import type { PageType } from 'popup/PopupPage'
 import { sendMessage } from 'webext-bridge/popup'
 import { ThemeToggle } from './ThemeToggle'
 

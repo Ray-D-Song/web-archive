@@ -1,5 +1,5 @@
 import toast from 'react-hot-toast'
-import router, { logOut } from './router'
+import { logOut } from './router'
 
 interface Options {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'

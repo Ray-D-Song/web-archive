@@ -1,4 +1,4 @@
-import { LoadStage } from 'utils/singleFile'
+import type { LoadStage } from 'utils/singleFile'
 import type { ProtocolWithReturn } from 'webext-bridge'
 
 declare module 'webext-bridge' {

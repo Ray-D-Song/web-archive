@@ -1,4 +1,4 @@
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 
 async function tokenMiddleware(c: Context, next: Next) {
   const authHeader = c.req.header('Authorization')
