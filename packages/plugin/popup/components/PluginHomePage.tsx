@@ -1,7 +1,8 @@
 import { Button } from '@web-archive/shared/components/button'
-import { House, LogOut, Settings } from 'lucide-react'
+import { House, LogOut } from 'lucide-react'
 import { PageType } from 'popup/PopupPage'
 import { sendMessage } from 'webext-bridge/popup'
+import { ThemeToggle } from './ThemeToggle'
 
 interface PluginHomePageProps {
   setActivePage: (tab: PageType) => void
@@ -28,11 +29,7 @@ function PluginHomePage({ setActivePage }: PluginHomePageProps) {
             onClick={openServerPage}
           >
           </House>
-          <Settings
-            className="cursor-pointer"
-            size={16}
-            onClick={() => setActivePage('settings')}
-          />
+          <ThemeToggle></ThemeToggle>
         </div>
 
         <LogOut

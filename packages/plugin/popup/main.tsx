@@ -1,7 +1,7 @@
 import '../styles'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { initTheme } from '../utils/theme'
+import { ThemeProvider } from '@web-archive/shared/components/theme-provider'
 import PopupContainer from './PopupPage'
 import '@web-archive/shared/global.css'
 
@@ -10,10 +10,10 @@ if (!root) {
   throw new Error('Root element not found')
 }
 
-initTheme()
-
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
-    <PopupContainer></PopupContainer>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <PopupContainer></PopupContainer>
+    </ThemeProvider>
   </React.StrictMode>,
 )
