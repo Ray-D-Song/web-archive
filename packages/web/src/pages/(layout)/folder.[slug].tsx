@@ -47,7 +47,7 @@ function FolderPage() {
       isNoMore: (d) => {
         if (!d)
           return false
-        return d.list.length % PAGE_SIZE !== 0
+        return d.list.length === 0 || d.list.length % PAGE_SIZE !== 0
       },
     },
   )
