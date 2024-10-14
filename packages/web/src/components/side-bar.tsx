@@ -2,13 +2,13 @@ import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { ThemeToggle } from '@web-archive/shared/components/theme-toggle'
 import { Button } from '@web-archive/shared/components/button'
 import { LogOut, Plus, Settings, Trash } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import type { Folder as FolderType, Page } from '@web-archive/shared/types'
 import Folder from '@web-archive/shared/components/folder'
 import { useRequest } from 'ahooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import NewFolderDialog from './new-folder-dialog'
+import { useNavigate, useParams } from '~/router'
 import fetcher from '~/utils/fetcher'
 import emitter from '~/utils/emitter'
 
@@ -24,9 +24,14 @@ function SideBar() {
 
   useEffect(() => {
     if (openedFolder !== null) {
-      navigate(`/folder/${openedFolder}`)
+      navigate('/folder/:slug', { params: { slug: openedFolder.toString() } })
     }
   }, [openedFolder])
+
+  const { slug } = useParams('/folder/:slug')
+  useEffect(() => {
+    setOpenedFolder(Number(slug))
+  }, [slug])
 
   emitter.on('refreshSideBar', refresh)
 
