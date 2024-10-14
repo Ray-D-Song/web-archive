@@ -1,7 +1,8 @@
-import { Folder as FolderIcon, FolderOpen as FolderOpenIcon } from 'lucide-react'
+import { Folder as FolderIcon, FolderOpen as FolderOpenIcon, Pencil, Trash } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useDrop } from 'ahooks'
 import { Page } from 'types'
+import { ContextMenu, ContextMenuContent, ContextMenuShortcut, ContextMenuItem, ContextMenuTrigger } from './context-menu'
 
 interface FolderProps {
   id: number
@@ -9,9 +10,11 @@ interface FolderProps {
   isOpen: boolean
   onClick?: (id: number) => void
   onDropPage?: (page: Page) => void
+  onDelete?: (folderId: number) => void
+  onEdit?: (folderId: number) => void
 }
 
-function Folder({ id, name, isOpen, onClick, onDropPage }: FolderProps) {
+function Folder({ id, name, isOpen, onClick, onDropPage, onDelete, onEdit }: FolderProps) {
   function handleClick() {
     onClick?.(id)
   }
@@ -32,14 +35,29 @@ function Folder({ id, name, isOpen, onClick, onDropPage }: FolderProps) {
   })
 
   return (
-    <li ref={folderRef} className={`flex flex-col justify-center cursor-pointer hover:bg-accent w-full p-2 rounded-md ${isOpen || isHover ? 'bg-accent' : ''}`}>
-      <div onClick={handleClick} className="flex items-center ">
-        {isOpen ? <FolderOpenIcon className="w-5 h-5 mr-5 ml-2" /> : <FolderIcon className="w-5 h-5 mr-5 ml-2" />}
-        <div className='flex-1 overflow-hidden text-ellipsis whitespace-nowrap'>
-          {name}
-        </div>
-      </div>
-    </li>
+    <ContextMenu>
+      <ContextMenuTrigger className={`cursor-pointer hover:bg-accent w-full rounded-md ${isOpen || isHover ? 'bg-accent' : ''}`}>
+        <li ref={folderRef} className='p-2 flex flex-col justify-center '>
+          <div onClick={handleClick} className="flex items-center ">
+            {isOpen ? <FolderOpenIcon className="w-5 h-5 mr-5 ml-2" /> : <FolderIcon className="w-5 h-5 mr-5 ml-2" />}
+            <div className='flex-1 overflow-hidden text-ellipsis whitespace-nowrap'>
+              {name}
+            </div>
+          </div>
+        </li>
+      </ContextMenuTrigger>
+      <ContextMenuContent className='w-48'>
+        <ContextMenuItem className='flex items-center space-x-2 cursor-pointer' onClick={() => onEdit?.(id)}>
+          <Pencil size={12} />
+          <div>Edit</div>
+        </ContextMenuItem>
+        <ContextMenuItem className='flex items-center space-x-2 cursor-pointer' onClick={() => onDelete?.(id)}>
+          <Trash size={12} />
+          <div>Delete</div>
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+
   )
 }
 
