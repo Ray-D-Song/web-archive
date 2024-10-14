@@ -7,6 +7,7 @@ import Folder from '@web-archive/shared/components/folder'
 import { useRequest } from 'ahooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { isNumberString } from '@web-archive/shared/utils'
 import NewFolderDialog from './new-folder-dialog'
 import { useNavigate, useParams } from '~/router'
 import fetcher from '~/utils/fetcher'
@@ -30,7 +31,8 @@ function SideBar() {
 
   const { slug } = useParams('/folder/:slug')
   useEffect(() => {
-    setOpenedFolder(Number(slug))
+    if (isNumberString(slug))
+      setOpenedFolder(Number(slug))
   }, [slug])
 
   emitter.on('refreshSideBar', refresh)
