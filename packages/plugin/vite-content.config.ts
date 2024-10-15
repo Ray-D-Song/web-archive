@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
   ],
   build: {
-    outDir: 'extension',
+    outDir: '../../dist/extension',
     emptyOutDir: false,
     rollupOptions: {
       input: {
