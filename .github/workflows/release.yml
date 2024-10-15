@@ -27,19 +27,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: Build plugin
         run: pnpm build:plugin
 
-      - name: Upload Release Asset
-        uses: actions/upload-artifact@v4
-        with:
-          name: plugin
-          path: dist/extension
+      - name: Build service
+        run: pnpm build:service
 
       - name: Zip extension folder
         run: |
           cd dist/extension
           zip -r ../../extension.zip .
+
+      - name: Zip service folder
+        run: |
+          cd dist/service
+          zip -r ../../service.zip .
+
+      - name: Upload extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension
+          path: extension.zip
+
+      - name: Upload service
+        uses: actions/upload-artifact@v4
+        with:
+          name: service
+          path: service.zip
 
       - name: Create Release
         id: create_release
@@ -48,5 +62,6 @@ jobs:
           tag_name: v0.1.0
           files: |
             extension.zip
+            service.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

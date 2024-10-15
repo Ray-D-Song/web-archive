@@ -114,6 +114,9 @@ importers:
       vite:
         specifier: ^5.3.1
         version: 5.3.1(@types/node@20.14.9)
+      vite-plugin-static-copy:
+        specifier: ^1.0.6
+        version: 1.0.6(vite@5.3.1(@types/node@20.14.9))
 
   packages/plugin:
     devDependencies:
@@ -126,9 +129,6 @@ importers:
       '@web-archive/shared':
         specifier: workspace:*
         version: link:../shared
-      vite-plugin-static-copy:
-        specifier: ^1.0.6
-        version: 1.0.6(vite@5.3.1(@types/node@20.14.9))
       webext-bridge:
         specifier: ^6.0.1
         version: 6.0.1
@@ -3610,7 +3610,7 @@ snapshots:
       '@babel/helper-validator-identifier': 7.24.7
       chalk: 2.4.2
       js-tokens: 4.0.0
-      picocolors: 1.0.1
+      picocolors: 1.1.0
 
   '@babel/parser@7.24.7':
     dependencies:

@@ -1,5 +1,5 @@
 name = "web-archive"
-pages_build_output_dir = "../../dist/service"
+pages_build_output_dir = "./src"
 
 [[r2_buckets]]
 binding = "BUCKET"
@@ -8,7 +8,7 @@ bucket_name = "web-archive"
 [[d1_databases]]
 binding = "DB"
 database_name = "web-archive"
-database_id = "ddc7b449-780b-43d9-9920-d7dcfde2407c"
+database_id = "xxxxxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
 [vars]
-BEARER_TOKEN = "dev_token"
+BEARER_TOKEN = "xxxx-xxxx-xxxxxxxxxxxx"

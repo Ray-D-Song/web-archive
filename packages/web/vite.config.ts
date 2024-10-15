@@ -26,6 +26,6 @@ export default defineConfig({
         assetFileNames: 'index.css',
       },
     },
-    outDir: '../../dist/service/static',
+    outDir: '../../dist/service/src/static',
   },
 })
