@@ -20,6 +20,7 @@ export default defineConfig((): UserConfig => {
         entry: 'src/server.ts',
         minify: false,
         external: ['/static'],
+        outputDir: '../../dist/service',
       }),
       devServer({
         adapter,

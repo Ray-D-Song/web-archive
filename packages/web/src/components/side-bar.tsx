@@ -2,31 +2,79 @@ import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { ThemeToggle } from '@web-archive/shared/components/theme-toggle'
 import { Button } from '@web-archive/shared/components/button'
 import { LogOut, Plus, Settings, Trash } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import type { Folder as FolderType, Page } from '@web-archive/shared/types'
 import Folder from '@web-archive/shared/components/folder'
 import { useRequest } from 'ahooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { isNil, isNumberString } from '@web-archive/shared/utils'
 import NewFolderDialog from './new-folder-dialog'
+import EditFolderDialog from './edit-folder-dialog'
+import { useNavigate, useParams } from '~/router'
 import fetcher from '~/utils/fetcher'
 import emitter from '~/utils/emitter'
+
+function getNextFolderId(folders: Array<FolderType>, index: number) {
+  if (index === 0 && folders.length === 1) {
+    return null
+  }
+  if (index === 0) {
+    return folders[index + 1].id
+  }
+  return folders[index - 1].id
+}
 
 function SideBar() {
   const navigate = useNavigate()
   const fetchFolders = fetcher<FolderType[]>('/folders/all', { method: 'GET' })
-  const { data: folders, refresh } = useRequest(fetchFolders)
+  const { data: folders, refresh, mutate: setFolders } = useRequest(fetchFolders)
 
   const [openedFolder, setOpenedFolder] = useState<number | null>(null)
   const handleFolderClick = (id: number) => {
     setOpenedFolder(id)
   }
 
+  const handleDeleteFolder = async (folderId: number) => {
+    if (isNil(folders) || !confirm('Are you sure you want to delete this folder?'))
+      return
+
+    try {
+      await fetcher('/folders/delete', {
+        method: 'DELETE',
+        query: { id: folderId.toString() },
+      })()
+      const oldFolderIndex = folders.findIndex(folder => folder.id === folderId)
+      const nextFolderId = getNextFolderId(folders, oldFolderIndex)
+      setFolders(folders.filter((_, index) => index !== oldFolderIndex))
+      if (nextFolderId !== null)
+        setOpenedFolder(nextFolderId)
+      else
+        navigate('/')
+      toast.success('Folder deleted successfully')
+    }
+    catch (error) {
+      toast.error('Failed to delete folder')
+    }
+  }
+
+  const [editFolderDialogOpen, setEditFolderDialogOpen] = useState(false)
+  const [editFolder, setEditFolder] = useState<FolderType>()
+  const handleEditFolder = (folderId: number) => {
+    setEditFolder(folders?.find(folder => folder.id === folderId))
+    setEditFolderDialogOpen(true)
+  }
+
   useEffect(() => {
     if (openedFolder !== null) {
-      navigate(`/folder/${openedFolder}`)
+      navigate('/folder/:slug', { params: { slug: openedFolder.toString() } })
     }
   }, [openedFolder])
+
+  const { slug } = useParams('/folder/:slug')
+  useEffect(() => {
+    if (isNumberString(slug))
+      setOpenedFolder(Number(slug))
+  }, [slug])
 
   emitter.on('refreshSideBar', refresh)
 
@@ -52,6 +100,12 @@ function SideBar() {
   return (
     <div className="w-64 h-screen shadow-lg dark:shadow-zinc-600 dark:shadow-sm">
       <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
+      <EditFolderDialog
+        afterSubmit={refresh}
+        open={editFolderDialogOpen}
+        setOpen={setEditFolderDialogOpen}
+        editFolder={editFolder}
+      />
       <ScrollArea className="h-full">
         <div className="p-4 min-h-full flex flex-col">
           <div className="flex space-x-2">
@@ -71,6 +125,8 @@ function SideBar() {
                   isOpen={openedFolder === folder.id}
                   onClick={handleFolderClick}
                   onDropPage={(page) => { handleDropPage(folder.id, page) }}
+                  onDelete={handleDeleteFolder}
+                  onEdit={handleEditFolder}
                 />
               ))}
             </ul>

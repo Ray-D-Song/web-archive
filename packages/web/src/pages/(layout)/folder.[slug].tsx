@@ -3,9 +3,10 @@ import { ExternalLink, Move, Trash } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@web-archive/shared/components/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@web-archive/shared/components/tooltip'
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
-import { Page } from '@web-archive/shared/types'
+import type { Page } from '@web-archive/shared/types'
 import { useDrag, useInfiniteScroll, useRequest } from 'ahooks'
-import React, { MouseEvent, useEffect, useRef } from 'react'
+import type { MouseEvent } from 'react'
+import React, { useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate, useParams } from '~/router'
 import fetcher from '~/utils/fetcher'
@@ -40,14 +41,14 @@ function FolderPage() {
     {
       target: () => {
         if (scrollRef.current)
-          // @ts-ignore todo fix type error
+          // @ts-expect-error todo fix type error
           return scrollRef.current.viewport
         return null
       },
       isNoMore: (d) => {
         if (!d)
           return false
-        return d.list.length % PAGE_SIZE !== 0
+        return d.list.length === 0 || d.list.length % PAGE_SIZE !== 0
       },
     },
   )

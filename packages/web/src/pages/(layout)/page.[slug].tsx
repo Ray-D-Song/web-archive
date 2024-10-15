@@ -1,5 +1,5 @@
 import { Button } from '@web-archive/shared/components/button'
-import { Page } from '@web-archive/shared/types'
+import type { Page } from '@web-archive/shared/types'
 import { useKeyPress, useRequest } from 'ahooks'
 import { ArrowLeft, Maximize, Trash } from 'lucide-react'
 import { useEffect, useState } from 'react'

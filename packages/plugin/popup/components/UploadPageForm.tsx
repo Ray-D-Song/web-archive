@@ -1,6 +1,6 @@
 import { Input } from '@web-archive/shared/components/input'
 import { Label } from '@web-archive/shared/components/label'
-import { PageType } from 'popup/PopupPage'
+import type { PageType } from 'popup/PopupPage'
 import type { ChangeEvent, ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 import { onMessage, sendMessage } from 'webext-bridge/popup'

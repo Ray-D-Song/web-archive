@@ -1,4 +1,5 @@
-import { FormEvent, useState } from 'react'
+import type { FormEvent } from 'react'
+import { useState } from 'react'
 import { Button } from '@web-archive/shared/components/button'
 import { Input } from '@web-archive/shared/components/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@web-archive/shared/components/card'

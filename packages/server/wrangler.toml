@@ -1,17 +1,13 @@
-name = "web-page-shelf"
+name = "web-archive"
 pages_build_output_dir = "./dist"
-
-[[kv_namespaces]]
-binding = "KV"
-id = "3c3cd6d35c2e43e8bf6b3e3973159790"
 
 [[r2_buckets]]
 binding = "BUCKET"
-bucket_name = "web-page-shelf"
+bucket_name = "web-archive"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "web-page-shelf"
+database_name = "web-archive"
 database_id = "ddc7b449-780b-43d9-9920-d7dcfde2407c"
 migrations_dir = "./src/sql/migrations"
 
