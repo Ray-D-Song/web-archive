@@ -8,6 +8,7 @@ import { useRequest } from 'ahooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { isNil, isNumberString } from '@web-archive/shared/utils'
+import { useLocation } from 'react-router-dom'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import { useNavigate, useParams } from '~/router'
@@ -71,10 +72,11 @@ function SideBar() {
   }, [openedFolder])
 
   const { slug } = useParams('/folder/:slug')
+  const { pathname } = useLocation()
   useEffect(() => {
-    if (isNumberString(slug))
+    if (pathname.startsWith('/folder/') && isNumberString(slug))
       setOpenedFolder(Number(slug))
-  }, [slug])
+  }, [slug, pathname])
 
   emitter.on('refreshSideBar', refresh)
 
