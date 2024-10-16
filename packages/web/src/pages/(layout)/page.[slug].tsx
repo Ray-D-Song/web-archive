@@ -74,16 +74,6 @@ function ArchivePage() {
     goBack()
   }
 
-  const [isFullScreen, setIsFullScreen] = useState(false)
-  const handleFullScreen = () => {
-    setIsFullScreen(true)
-  }
-  const ESCCode = 27
-  useKeyPress(ESCCode, () => {
-    if (isFullScreen)
-      setIsFullScreen(false)
-  })
-
   return (
     <>
       <nav className="p-2 flex justify-between items-center">
@@ -91,13 +81,6 @@ function ArchivePage() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleFullScreen}
-          >
-            <Maximize className="w-5 h-5" />
-          </Button>
           <Button
             variant="destructive"
             size="sm"
@@ -119,7 +102,7 @@ function ArchivePage() {
             : (
               <iframe
                 src={pageContentUrl}
-                className={`${isFullScreen ? 'fixed inset-0 w-screen h-screen bg-current' : 'w-full h-full bg-current'}`}
+                className="w-full h-full bg-current"
                 sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               />
               )

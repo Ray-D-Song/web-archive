@@ -37,8 +37,8 @@ function Folder({ id, name, isOpen, onClick, onDropPage, onDelete, onEdit }: Fol
   return (
     <ContextMenu>
       <ContextMenuTrigger className={`cursor-pointer hover:bg-accent w-full rounded-md ${isOpen || isHover ? 'bg-accent' : ''}`}>
-        <li ref={folderRef} className='p-2 px-1 flex flex-col justify-center '>
-          <div onClick={handleClick} className="flex items-center ">
+        <li onClick={handleClick} ref={folderRef} className='p-2 px-1 flex flex-col justify-center '>
+          <div className="flex items-center ">
             {isOpen ? <FolderOpenIcon className="w-4 h-4 mr-2 ml-2" /> : <FolderIcon className="w-4 h-4 mr-2 ml-2" />}
             <div className='flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm'>
               {name}
