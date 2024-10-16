@@ -1,5 +1,5 @@
 import type { Page } from '@web-archive/shared/types'
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { useDrag } from 'ahooks'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@web-archive/shared/components/card'
 import { Button } from '@web-archive/shared/components/button'

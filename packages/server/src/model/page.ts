@@ -1,14 +1,15 @@
 import { isNotNil } from '@web-archive/shared/utils'
+import type { D1Database } from '@cloudflare/workers-types/experimental'
 import type { Page } from '~/sql/types'
 
 async function selectPageTotalCount(DB: D1Database, options: { folderId: number }) {
   const { folderId } = options
   const sql = `
-    SELECT COUNT(*) FROM pages
+    SELECT COUNT(*) as count FROM pages
     WHERE folderId = ? AND isDeleted = 0
   `
   const bindParams: (number | string)[] = [folderId]
-  const result = await DB.prepare(sql).bind(bindParams).first()
+  const result = await DB.prepare(sql).bind(...bindParams).first()
   return result.count
 }
 

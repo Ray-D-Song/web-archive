@@ -59,8 +59,9 @@ function FolderPage() {
     },
   )
   useEffect(() => {
+    pageNum.current = 1
     reload()
-  }, [searchTrigger])
+  }, [searchTrigger, slug])
 
   const { run: handleDeletePage } = useRequest(deletePage, {
     manual: true,

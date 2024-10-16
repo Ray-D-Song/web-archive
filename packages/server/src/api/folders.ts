@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { D1Database } from '@cloudflare/workers-types/experimental'
-import { selectPagesByFolderId } from './pages'
+import { queryPage } from '~/model/page'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 
@@ -118,7 +118,7 @@ app.delete(
 
     const { id } = query
 
-    const allPages = await selectPagesByFolderId(c.env.DB, { folderId: id })
+    const allPages = await queryPage(c.env.DB, { folderId: id })
 
     const [folderResult, pageResult] = await c.env.DB.batch([
       c.env.DB.prepare(`
