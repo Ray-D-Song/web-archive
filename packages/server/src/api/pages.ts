@@ -5,7 +5,7 @@ import { isNotNil, isNumberString } from '@web-archive/shared/utils'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 import type { Page } from '~/sql/types'
-import { queryPage, selectPageTotalCount } from '~/model/page'
+import { deletePageById, queryDeletedPage, queryPage, selectDeletedPageTotalCount, selectPageTotalCount } from '~/model/page'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -158,29 +158,21 @@ app.get(
 
 app.delete(
   '/delete_page',
-  validator('query', (value) => {
+  validator('query', (value, c) => {
     if (!value.id || Number.isNaN(Number(value.id))) {
-      return 'ID is required'
+      return c.json(result.error(400, 'ID is required'))
     }
     return {
       id: Number(value.id),
     }
   }),
   async (c) => {
-    const query = c.req.valid('query')
-    if (typeof query === 'string') {
-      return c.json({ status: 'error', message: query })
-    }
+    const { id } = c.req.valid('query')
 
-    const { id } = query
-    const deleteResult = await c.env.DB.prepare(
-      'DELETE FROM pages WHERE id = ?',
-    )
-      .bind(id)
-      .run()
-    if (!deleteResult.error) {
+    if (await deletePageById(c.env.DB, id)) {
       return c.json(result.success({ id }))
     }
+
     return c.json(result.error(500, 'Failed to delete page'))
   },
 )
@@ -215,6 +207,30 @@ app.put(
       return c.json(result.error(500, 'Failed to update page'))
     }
     return c.json(result.success(null))
+  },
+)
+
+app.post(
+  '/query_deleted',
+  validator('json', (value, c) => {
+    if (value.pageNumber && !isNumberString(value.pageNumber)) {
+      return c.json(result.error(400, 'Page number should be a number'))
+    }
+
+    if (value.pageSize && !isNumberString(value.pageSize)) {
+      return c.json(result.error(400, 'Page size should be a number'))
+    }
+
+    return {
+      pageNumber: isNotNil(value.pageNumber) ? Number(value.pageNumber) : undefined,
+      pageSize: isNotNil(value.pageSize) ? Number(value.pageSize) : undefined,
+    }
+  }),
+  async (c) => {
+    const { pageNumber = 1, pageSize = 30 } = c.req.valid('json')
+    const pages = await queryDeletedPage(c.env.DB, { pageNumber, pageSize })
+    const total = await selectDeletedPageTotalCount(c.env.DB)
+    return c.json(result.success({ list: pages, total }))
   },
 )
 
