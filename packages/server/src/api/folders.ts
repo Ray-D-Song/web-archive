@@ -1,70 +1,11 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { D1Database } from '@cloudflare/workers-types/experimental'
+import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { queryPage } from '~/model/page'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
-
-interface Folder {
-  id: number
-  name: string
-}
-
-interface Page {
-  id: number
-  title: string
-  contentUrl: string
-  pageUrl: string
-  folderId: number
-  pageDesc: string
-}
-
-async function selectAllFolders(DB: D1Database) {
-  const sql = `
-    SELECT 
-      id,
-      name
-    FROM folders
-    WHERE isDeleted == 0
-  `
-  const sqlResult = await DB.prepare(sql).all<Folder>()
-  if (sqlResult.error) {
-    throw sqlResult.error
-  }
-  return sqlResult.results
-}
-
-async function selectAllPages(DB: D1Database) {
-  const sql = `
-    SELECT
-      id,
-      title,
-      contentUrl AS contentUrl,
-      pageUrl AS pageUrl,
-      folderId AS folderId,
-      pageDesc AS pageDesc
-    FROM pages
-    WHERE isDeleted == 0
-  `
-  const sqlResult = await DB.prepare(sql).all<Page>()
-  if (sqlResult.error) {
-    throw sqlResult.error
-  }
-  return sqlResult.results
-}
-
-async function checkFolderExists(DB: D1Database, name: string): Promise<boolean> {
-  const sql = `
-    SELECT 
-      id
-    FROM folders
-    WHERE name = ? AND isDeleted == 0
-  `
-  const sqlResult = await DB.prepare(sql).bind(name).first()
-  if (!sqlResult)
-    return false
-  return true
-}
+import { checkFolderExists, deleteFolderById, insertFolder, selectAllFolders, updateFolder } from '~/model/folder'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -86,27 +27,20 @@ app.post(
     }
   }),
   async (c) => {
-    const json = c.req.valid('json')
+    const { name } = c.req.valid('json')
 
-    const { name } = json
-
-    const sql = `
-      INSERT INTO folders (name)
-      VALUES (?)
-    `
-    const sqlResult = await c.env.DB.prepare(sql).bind(name).run()
-    if (sqlResult.error) {
-      throw sqlResult.error
+    if (await insertFolder(c.env.DB, name)) {
+      return c.json(result.success(true))
     }
 
-    return c.json(result.success(true))
+    return c.json(result.error(500, 'Failed to create folder'))
   },
 )
 
 app.delete(
   '/delete',
   validator('query', (value, c) => {
-    if (!value.id || Number.isNaN(Number(value.id))) {
+    if (isNil(value.id) || !isNumberString(value.id)) {
       return c.json(result.error(400, 'ID is required'))
     }
     return {
@@ -120,18 +54,7 @@ app.delete(
 
     const allPages = await queryPage(c.env.DB, { folderId: id })
 
-    const [folderResult, pageResult] = await c.env.DB.batch([
-      c.env.DB.prepare(`
-        UPDATE folders
-        SET isDeleted = 1
-        WHERE id = ?
-      `).bind(id),
-      c.env.DB.prepare(`
-        UPDATE pages
-        SET isDeleted = 1
-        WHERE folderId = ?
-      `).bind(id),
-    ])
+    const { folderResult, pageResult } = await deleteFolderById(c.env.DB, id)
 
     if (folderResult.error || pageResult.error) {
       throw folderResult.error || pageResult.error
@@ -152,11 +75,11 @@ app.delete(
 app.put(
   '/update',
   validator('json', (value, c) => {
-    if (!value.id || Number.isNaN(Number(value.id))) {
+    if (isNil(value.id) || !isNumberString(value.id)) {
       return c.json(result.error(400, 'ID is required'))
     }
 
-    if (value.name && typeof value.name !== 'string') {
+    if (isNil(value.name) || typeof value.name !== 'string') {
       return c.json(result.error(400, 'Name must be a string'))
     }
 
@@ -166,20 +89,9 @@ app.put(
     }
   }),
   async (c) => {
-    const json = c.req.valid('json')
+    const { id, name } = c.req.valid('json')
 
-    const { id, name } = json
-
-    const prepared = c.env.DB.prepare(`
-      UPDATE folders
-      SET name = ?
-      WHERE id = ?
-    `).bind(name, id)
-    const sqlResult = await prepared.run()
-    if (sqlResult.error) {
-      throw sqlResult.error
-    }
-
+    const sqlResult = await updateFolder(c.env.DB, { id, name })
     if (sqlResult.meta.changes === 0) {
       if (!(await checkFolderExists(c.env.DB, name))) {
         return c.json(result.error(400, 'Folder does not exists'))
