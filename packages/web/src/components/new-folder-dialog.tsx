@@ -2,10 +2,10 @@ import { Dialog, DialogContent } from '@web-archive/shared/components/dialog'
 import { Button } from '@web-archive/shared/components/button'
 import { Input } from '@web-archive/shared/components/input'
 import { useState } from 'react'
-import { DialogTitle } from '@radix-ui/react-dialog'
+import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
 import toast from 'react-hot-toast'
 import { useRequest } from 'ahooks'
-import fetcher from '~/utils/fetcher'
+import { createFolder } from '~/data/folder'
 
 interface NewFolderProps {
   afterSubmit: () => void
@@ -16,7 +16,7 @@ interface NewFolderProps {
 function NewFolderDialog({ afterSubmit, open, setOpen }: NewFolderProps) {
   const [name, setName] = useState('')
   const { run } = useRequest(
-    fetcher('/folders/create', { method: 'POST', body: { name } }),
+    createFolder,
     {
       manual: true,
       onSuccess: () => {
@@ -34,12 +34,13 @@ function NewFolderDialog({ afterSubmit, open, setOpen }: NewFolderProps) {
       toast.error('Folder name is required')
       return
     }
-    run()
+    run(name)
   }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogTitle>Create New Folder</DialogTitle>
+        <DialogDescription></DialogDescription>
         <Input value={name} onChange={e => setName(e.target.value)} placeholder="Folder Name" />
         <Button onClick={handleSubmit}>Create</Button>
       </DialogContent>

@@ -1,16 +1,16 @@
 import { Button } from '@web-archive/shared/components/button'
 import { Input } from '@web-archive/shared/components/input'
 import { Search } from 'lucide-react'
-import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-function SearchBar({ className }: { className?: string }) {
-  const [keyword, setKeyword] = useState('')
+interface SearchBarProps {
+  className?: string
+  keyword: string
+  setKeyword: (keyword: string) => void
+  handleSearch: () => void
+}
 
-  const handleSerach = () => {
-    console.log('searching', keyword)
-  }
-
+function SearchBar({ className, keyword, setKeyword, handleSearch }: SearchBarProps) {
   const location = useLocation()
   const match = location.pathname.startsWith('/folder')
 
@@ -26,13 +26,13 @@ function SearchBar({ className }: { className?: string }) {
           onChange={e => setKeyword(e.target.value)}
           onKeyUp={(e) => {
             if (e.key === 'Enter') {
-              handleSerach()
+              handleSearch()
             }
           }}
         >
         </Input>
       </div>
-      <Button onClick={handleSerach}>Search</Button>
+      <Button onClick={handleSearch}>Search</Button>
     </div>
   )
 }

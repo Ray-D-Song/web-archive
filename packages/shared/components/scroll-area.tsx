@@ -3,13 +3,17 @@ import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
 
 import { cn } from '../utils/helper'
 
-const ScrollArea = React.forwardRef<
-  React.ElementRef<typeof ScrollAreaPrimitive.Root> & {
-    viewport: React.ElementRef<typeof ScrollAreaPrimitive.Viewport>
-    root: React.ElementRef<typeof ScrollAreaPrimitive.Root>
-  },
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(({ className, children, ...props }, ref) => {
+interface Props {
+  className?: string
+  children?: React.ReactNode
+}
+
+export type Ref = {
+  viewport: React.ElementRef<typeof ScrollAreaPrimitive.Viewport> | null
+  root: React.ElementRef<typeof ScrollAreaPrimitive.Root> | null
+}
+
+const ScrollArea = React.forwardRef<Ref, Props>(({ className, children, ...props }, ref) => {
   const rootRef = React.useRef<React.ElementRef<typeof ScrollAreaPrimitive.Root>>(null)
   const viewportRef = React.useRef<React.ElementRef<typeof ScrollAreaPrimitive.Viewport>>(null)
   React.useImperativeHandle(ref, () => ({

@@ -1,4 +1,5 @@
 import { Label } from '@radix-ui/react-context-menu'
+import { DialogDescription } from '@radix-ui/react-dialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@web-archive/shared/components/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@web-archive/shared/components/select'
 import { useTheme } from '@web-archive/shared/components/theme-provider'
@@ -16,6 +17,8 @@ function SettingDialog({ open, setOpen }: { open: boolean, setOpen: (open: boole
             Setting
           </DialogTitle>
         </DialogHeader>
+        <DialogDescription>
+        </DialogDescription>
         <div>
           <div className="flex items-center space-x-6">
             <Label className="font-bold">Color theme: </Label>

@@ -5,6 +5,7 @@ import { isNotNil, isNumberString } from '@web-archive/shared/utils'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 import type { Page } from '~/sql/types'
+import { queryPage, selectPageTotalCount } from '~/model/page'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -14,35 +15,6 @@ interface InsertPageOptions {
   pageUrl: string
   contentUrl: string
   folderId: number
-}
-
-export async function selectPagesByFolderId(DB: D1Database, options: { folderId: number, pageNumber?: number, pageSize?: number }) {
-  const { folderId, pageNumber, pageSize } = options
-  let sql = `
-    SELECT
-      id,
-      title,
-      contentUrl,
-      pageUrl,
-      folderId,
-      pageDesc,
-      createdAt
-      updatedAt
-    FROM pages
-    WHERE folderId == ? AND isDeleted == 0
-    ORDER BY createdAt DESC
-  `
-  const bindParams = [folderId]
-  if (isNotNil(pageNumber) && isNotNil(pageSize)) {
-    sql += `LIMIT ? OFFSET ?`
-    bindParams.push(pageSize)
-    bindParams.push((pageNumber - 1) * pageSize)
-  }
-  const sqlResult = await DB.prepare(sql).bind(...bindParams).all<Page>()
-  if (sqlResult.error) {
-    throw sqlResult.error
-  }
-  return sqlResult.results
 }
 
 async function insertPage(DB: D1Database, pageOptions: InsertPageOptions) {
@@ -128,9 +100,9 @@ app.post(
   },
 )
 
-app.get(
+app.post(
   '/query',
-  validator('query', (value, c) => {
+  validator('json', (value, c) => {
     if (!value.folderId || Number.isNaN(Number(value.folderId))) {
       return c.json(result.error(400, 'Folder ID is required'))
     }
@@ -147,16 +119,18 @@ app.get(
       folderId: Number(value.folderId),
       pageNumber: isNotNil(value.pageNumber) ? Number(value.pageNumber) : undefined,
       pageSize: isNotNil(value.pageSize) ? Number(value.pageSize) : undefined,
+      keyword: value.keyword,
     }
   }),
   async (c) => {
-    const { folderId, pageNumber, pageSize } = c.req.valid('query')
+    const { folderId, pageNumber, pageSize, keyword } = c.req.valid('json')
 
-    const pages = await selectPagesByFolderId(
+    const pages = await queryPage(
       c.env.DB,
-      { folderId: Number(folderId), pageNumber, pageSize },
+      { folderId: Number(folderId), pageNumber, pageSize, keyword },
     )
-    return c.json(result.success(pages))
+    const total = await selectPageTotalCount(c.env.DB, { folderId: Number(folderId) })
+    return c.json(result.success({ list: pages, total }))
   },
 )
 
@@ -205,7 +179,7 @@ app.delete(
       .bind(id)
       .run()
     if (!deleteResult.error) {
-      return c.json(result.success(null))
+      return c.json(result.success({ id }))
     }
     return c.json(result.error(500, 'Failed to delete page'))
   },

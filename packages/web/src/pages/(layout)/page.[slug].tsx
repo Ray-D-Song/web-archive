@@ -1,10 +1,9 @@
 import { Button } from '@web-archive/shared/components/button'
-import type { Page } from '@web-archive/shared/types'
 import { useKeyPress, useRequest } from 'ahooks'
 import { ArrowLeft, Maximize, Trash } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { deletePage, getPageDetail } from '~/data/page'
 import { useNavigate, useParams } from '~/router'
-import fetcher from '~/utils/fetcher'
 
 async function getPageContent(pageId: string | undefined) {
   if (!pageId)
@@ -31,18 +30,14 @@ function ArchivePage() {
   })
 
   const { data: pageDetail } = useRequest(
-    fetcher<Page>('/pages/get_page', {
-      query: {
-        id: slug ?? '',
-      },
-      method: 'GET',
-    }),
+    getPageDetail,
     {
       onSuccess: (pageDetail) => {
         if (!pageDetail) {
           navigate('/error/:slug', { params: { slug: '404' } })
         }
       },
+      defaultParams: [slug],
     },
   )
 
@@ -65,12 +60,7 @@ function ArchivePage() {
   }, [pageContentUrl])
 
   const { runAsync: runDeletePage } = useRequest(
-    fetcher('/pages/delete_page', {
-      method: 'DELETE',
-      query: {
-        id: slug,
-      },
-    }),
+    deletePage,
     {
       manual: true,
     },
@@ -78,7 +68,9 @@ function ArchivePage() {
   const handleDeletePage = async () => {
     if (!window.confirm('Are you sure you want to delete this page?'))
       return
-    await runDeletePage()
+    if (!pageDetail)
+      return
+    await runDeletePage(pageDetail)
     goBack()
   }
 

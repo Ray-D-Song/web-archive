@@ -12,8 +12,9 @@ import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import SettingDialog from './setting-dialog'
 import { useNavigate, useParams } from '~/router'
-import fetcher from '~/utils/fetcher'
 import emitter from '~/utils/emitter'
+import { deleteFolder, getAllFolder } from '~/data/folder'
+import { updatePage } from '~/data/page'
 
 function getNextFolderId(folders: Array<FolderType>, index: number) {
   if (index === 0 && folders.length === 1) {
@@ -27,8 +28,7 @@ function getNextFolderId(folders: Array<FolderType>, index: number) {
 
 function SideBar() {
   const navigate = useNavigate()
-  const fetchFolders = fetcher<FolderType[]>('/folders/all', { method: 'GET' })
-  const { data: folders, refresh, mutate: setFolders } = useRequest(fetchFolders)
+  const { data: folders, refresh, mutate: setFolders } = useRequest(getAllFolder)
 
   const [openedFolder, setOpenedFolder] = useState<number | null>(null)
   const handleFolderClick = (id: number) => {
@@ -40,10 +40,7 @@ function SideBar() {
       return
 
     try {
-      await fetcher('/folders/delete', {
-        method: 'DELETE',
-        query: { id: folderId.toString() },
-      })()
+      await deleteFolder(folderId)
       const oldFolderIndex = folders.findIndex(folder => folder.id === folderId)
       const nextFolderId = getNextFolderId(folders, oldFolderIndex)
       setFolders(folders.filter((_, index) => index !== oldFolderIndex))
@@ -91,12 +88,12 @@ function SideBar() {
     if (!page || page.folderId === folderId)
       return
 
-    emitter.emit('movePage', { pageId: page.id, folderId })
-    await fetcher('/pages/update_page', {
-      method: 'PUT',
-      body: JSON.stringify({ id: page.id, folderId }),
-    })()
+    await updatePage({
+      id: page.id,
+      folderId,
+    })
     toast.success('Page moved successfully')
+    emitter.emit('movePage', { pageId: page.id, folderId })
   }
 
   const [settingDialogOpen, setSettingDialogOpen] = useState(false)

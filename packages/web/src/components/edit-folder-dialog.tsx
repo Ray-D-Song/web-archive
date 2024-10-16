@@ -5,7 +5,7 @@ import { isNil } from '@web-archive/shared/utils'
 import { useRequest } from 'ahooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import fetcher from '~/utils/fetcher'
+import { updateFolder } from '~/data/folder'
 
 interface EditFolderProps {
   afterSubmit: () => void
@@ -23,7 +23,7 @@ function EditFolderDialog({ afterSubmit, open, setOpen, editFolder }: EditFolder
     setFolderName(editFolder?.name ?? '')
   }, [editFolder])
   const { run } = useRequest(
-    fetcher('/folders/update', { method: 'PUT', body: { id: editFolder?.id, name: folderName } }),
+    updateFolder,
     {
       manual: true,
       onSuccess: () => {
@@ -50,7 +50,7 @@ function EditFolderDialog({ afterSubmit, open, setOpen, editFolder }: EditFolder
       toast.error('Folder id is required')
       return
     }
-    run()
+    run(editFolder.id, folderName)
   }
 
   return (

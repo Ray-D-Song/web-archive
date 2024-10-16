@@ -1,53 +1,40 @@
 import toast from 'react-hot-toast'
 import { logOut } from './router'
 
-interface Options {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+type Options = {
+  method: 'POST' | 'PUT'
   body?: Record<string, unknown> | string
+  query?: Record<string, string>
+} | {
+  method: 'GET' | 'DELETE'
   query?: Record<string, string>
 }
 
-function fetcher<T>(url: string, {
-  method = 'GET',
-  body,
-  query,
-}: Options) {
-  url = `/api${url}`
-  return async () => {
-    if (body && (method !== 'POST' && method !== 'PUT')) {
-      toast.error('Body is only allowed for POST or PUT method')
-      return
-    }
-    let queryString = ''
-    if (query) {
-      queryString = new URLSearchParams(query).toString()
-      url += `?${queryString}`
-    }
-    if (method === 'GET') {
-      return fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      }).then(res => processResponse<T>(res))
-    }
-    return fetch(url, {
-      method,
-      body: typeof body === 'string' ? body : JSON.stringify(body),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
-    }).then(res => processResponse<T>(res))
-  }
+async function fetcher<T>(url: string, options: Options): Promise<T> {
+  const { method, query } = options
+  url = processQueryString(url, query)
+
+  const res = await fetch(url, {
+    ...(method === 'POST' || method === 'PUT' ? { body: typeof options.body === 'string' ? options.body : JSON.stringify(options.body) } : {}),
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+  })
+
+  return processResponse<T>(res)
+}
+
+function processQueryString(url: string, query?: Record<string, string>) {
+  if (!query)
+    return `/api${url}`
+
+  const queryString = new URLSearchParams(query).toString()
+  return `/api${url}?${queryString}`
 }
 
 async function processResponse<T>(res: Response) {
-  if (res.status === 401) {
-    logOut()
-    return
-  }
   if (!res.ok) {
     toast.error('Network error')
   }
@@ -60,6 +47,7 @@ async function processResponse<T>(res: Response) {
     toast.error(content.message)
     switch (content.code) {
       case 401:
+        logOut()
         break
       default:
         break
