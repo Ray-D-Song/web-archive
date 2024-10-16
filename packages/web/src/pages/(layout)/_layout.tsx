@@ -2,6 +2,7 @@ import { Toaster } from 'react-hot-toast'
 import { Outlet } from 'react-router-dom'
 import { ThemeProvider } from '@web-archive/shared/components/theme-provider'
 import SideBar from '~/components/side-bar'
+import Header from '~/components/header'
 
 function Layout() {
   return (
@@ -15,6 +16,7 @@ function Layout() {
           <SideBar />
         </div>
         <div className="flex-1 flex flex-col">
+          <Header />
           <Outlet />
         </div>
       </main>

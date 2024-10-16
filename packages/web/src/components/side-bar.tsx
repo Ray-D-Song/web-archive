@@ -1,5 +1,4 @@
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
-import { ThemeToggle } from '@web-archive/shared/components/theme-toggle'
 import { Button } from '@web-archive/shared/components/button'
 import { LogOut, Plus, Settings, Trash } from 'lucide-react'
 import type { Folder as FolderType, Page } from '@web-archive/shared/types'
@@ -11,6 +10,7 @@ import { isNil, isNumberString } from '@web-archive/shared/utils'
 import { useLocation } from 'react-router-dom'
 import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
+import SettingDialog from './setting-dialog'
 import { useNavigate, useParams } from '~/router'
 import fetcher from '~/utils/fetcher'
 import emitter from '~/utils/emitter'
@@ -99,6 +99,8 @@ function SideBar() {
     toast.success('Page moved successfully')
   }
 
+  const [settingDialogOpen, setSettingDialogOpen] = useState(false)
+
   return (
     <div className="w-64 h-screen shadow-lg dark:shadow-zinc-600 dark:shadow-sm">
       <NewFolderDialog afterSubmit={refresh} open={newFolderDialogOpen} setOpen={setNewFolderDialogOpen} />
@@ -108,13 +110,13 @@ function SideBar() {
         setOpen={setEditFolderDialogOpen}
         editFolder={editFolder}
       />
+      <SettingDialog open={settingDialogOpen} setOpen={setSettingDialogOpen} />
       <ScrollArea className="h-full">
         <div className="p-4 min-h-full flex flex-col">
           <div className="flex space-x-2">
-            <ThemeToggle></ThemeToggle>
-            <Button variant="ghost" className="flex-1 text-sm justify-center bg-green-600 hover:bg-green-700 text-white hover:text-white" onClick={() => setNewFolderDialogOpen(true)}>
+            <Button className="flex-1 text-sm justify-center opacity-60 hover:opacity-100 transition-opacity duration-300" onClick={() => setNewFolderDialogOpen(true)}>
               <Plus className="w-5 h-5 mr-2" />
-              New Directory
+              New Folder
             </Button>
           </div>
           <nav className="flex-1">
@@ -133,20 +135,21 @@ function SideBar() {
               ))}
             </ul>
           </nav>
-          <Button variant="ghost" className="w-full text-sm justify-start">
-            <Settings className="w-5 h-5 mr-2" />
+          <div className="border-b border-gray-200 dark:border-gray-800 my-2" />
+          <Button variant="ghost" className="w-full text-sm justify-start gap-4" onClick={() => setSettingDialogOpen(true)}>
+            <Settings className="w-4 h-4 mr-2" />
             Settings
           </Button>
-          <Button variant="ghost" className="w-full text-sm justify-start">
-            <Trash className="w-5 h-5 mr-2" />
+          <Button variant="ghost" className="w-full text-sm justify-start gap-4">
+            <Trash className="w-4 h-4 mr-2" />
             Deleted
           </Button>
           <Button
             variant="ghost"
-            className="w-full text-sm justify-start"
+            className="w-full text-sm justify-start gap-4"
             onClick={handleLogout}
           >
-            <LogOut className="w-5 h-5 mr-2" />
+            <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>
         </div>

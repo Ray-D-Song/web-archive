@@ -2,11 +2,12 @@ import { Button } from '@web-archive/shared/components/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@web-archive/shared/components/card'
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@web-archive/shared/components/tooltip'
-import { Page } from '@web-archive/shared/types'
+import type { Page } from '@web-archive/shared/types'
 import { useDrag, useInfiniteScroll } from 'ahooks'
 import { ExternalLink, Move, Trash } from 'lucide-react'
 import React, { useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
+import Empty from './empty'
 import { useNavigate } from '~/router'
 import { dragIcon } from '~/utils/drag'
 import emitter from '~/utils/emitter'
@@ -96,12 +97,20 @@ function PageListContainer({ folderId, queryKeyword }: PageListContainerProps) {
           </div>
           )
         : (
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <PageList pages={pagesData.list.filter((_, index) => index % 3 === 0)} onPageDelete={handlePageDelete} />
-              <PageList pages={pagesData.list.filter((_, index) => index % 3 === 1)} onPageDelete={handlePageDelete} />
-              <PageList pages={pagesData.list.filter((_, index) => index % 3 === 2)} onPageDelete={handlePageDelete} />
-            </div>
+          <div className="h-full">
+            {
+              pagesData.list.length === 0
+                ? (
+                  <Empty className="h-full" />
+                  )
+                : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <PageList pages={pagesData.list.filter((_, index) => index % 3 === 0)} onPageDelete={handlePageDelete} />
+                    <PageList pages={pagesData.list.filter((_, index) => index % 3 === 1)} onPageDelete={handlePageDelete} />
+                    <PageList pages={pagesData.list.filter((_, index) => index % 3 === 2)} onPageDelete={handlePageDelete} />
+                  </div>
+                  )
+            }
             {
               loadingMore && (
                 <div className="w-full h-16 flex flex-col items-center justify-center mt-2">
