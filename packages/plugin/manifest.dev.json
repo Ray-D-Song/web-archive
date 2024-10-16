@@ -2,16 +2,16 @@
   "name": "web-page-shelf",
   "author": "Ray-D-Song",
   "icons": {
-    "16": "assets/icon-512.png",
-    "48": "assets/icon-512.png",
-    "64": "assets/icon-512.png",
-    "128": "assets/icon-512.png"
+    "16": "assets/icon.png",
+    "48": "assets/icon.png",
+    "64": "assets/icon.png",
+    "128": "assets/icon.png"
   },
   "description": "SingleFile with categories and exhibition pages",
   "version": "1.0",
   "manifest_version": 3,
   "action": {
-    "default_icon": "assets/icon-512.png",
+    "default_icon": "assets/icon.png",
     "default_popup": "popup/index.html"
   },
   "host_permissions": [
