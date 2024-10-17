@@ -5,7 +5,7 @@ type Page = {
   pageUrl: string
   folderId: number
   pageDesc: string
-  isDeleted: boolean
+  isDeleted: number
   deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -14,7 +14,7 @@ type Page = {
 type Folder = {
   id: number
   name: string
-  isDeleted: boolean
+  isDeleted: number
   deletedAt: Date | null
   createdAt: Date
   updatedAt: Date

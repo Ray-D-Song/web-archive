@@ -115,12 +115,29 @@ async function getPageById(DB: D1Database, options: { id: number, isDeleted?: bo
     WHERE id = ?
   `
   const page = await DB.prepare(sql).bind(id).first<Page>()
-  // todo fix type error
-  /* console.log(page)
   if (isNotNil(isDeleted) && page?.isDeleted !== Number(isDeleted)) {
     return null
-  } */
+  }
   return page
+}
+
+interface InsertPageOptions {
+  title: string
+  pageDesc: string
+  pageUrl: string
+  contentUrl: string
+  folderId: number
+}
+
+async function insertPage(DB: D1Database, pageOptions: InsertPageOptions) {
+  const { title, pageDesc, pageUrl, contentUrl, folderId } = pageOptions
+  const insertResult = await DB
+    .prepare(
+      'INSERT INTO pages (title, pageDesc, pageUrl, contentUrl, folderId) VALUES (?, ?, ?, ?, ?)',
+    )
+    .bind(title, pageDesc, pageUrl, contentUrl, folderId)
+    .run()
+  return insertResult.success
 }
 
 export {
@@ -131,4 +148,5 @@ export {
   deletePageById,
   restorePage,
   getPageById,
+  insertPage,
 }

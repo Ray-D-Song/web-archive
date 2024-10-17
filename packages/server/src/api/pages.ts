@@ -1,78 +1,43 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
-import type { D1Database } from '@cloudflare/workers-types/experimental'
 import { isNil, isNotNil, isNumberString } from '@web-archive/shared/utils'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
-import type { Page } from '~/sql/types'
-import { deletePageById, getPageById, queryDeletedPage, queryPage, restorePage, selectDeletedPageTotalCount, selectPageTotalCount } from '~/model/page'
+import { deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, restorePage, selectDeletedPageTotalCount, selectPageTotalCount } from '~/model/page'
 import { getFolderById, restoreFolder } from '~/model/folder'
 
 const app = new Hono<HonoTypeUserInformation>()
 
-interface InsertPageOptions {
-  title: string
-  pageDesc: string
-  pageUrl: string
-  contentUrl: string
-  folderId: number
-}
-
-async function insertPage(DB: D1Database, pageOptions: InsertPageOptions) {
-  const { title, pageDesc, pageUrl, contentUrl, folderId } = pageOptions
-  const insertResult = await DB
-    .prepare(
-      'INSERT INTO pages (title, pageDesc, pageUrl, contentUrl, folderId) VALUES (?, ?, ?, ?, ?)',
-    )
-    .bind(title, pageDesc, pageUrl, contentUrl, folderId)
-    .run()
-  return insertResult.error
-}
-
-async function getPage(DB: D1Database, id: number) {
-  const sql = `
-    SELECT
-      *
-    FROM pages
-    WHERE id = ?
-    AND isDeleted = 0
-  `
-  return await DB.prepare(sql).bind(id).first<Page>()
-}
-
 app.post(
   '/upload_new_page',
-  validator('form', (value) => {
+  validator('form', (value, c) => {
     if (!value.title || typeof value.title !== 'string') {
-      return 'Title is required'
+      return c.json(result.error(400, 'Title is required'))
     }
-    if (typeof value.pageDesc !== 'string') {
-      return 'Description is required'
+    if (value.pageDesc && typeof value.pageDesc !== 'string') {
+      return c.json(result.error(400, 'Description should be a string'))
     }
     if (!value.pageUrl || typeof value.pageUrl !== 'string') {
-      return 'URL is required'
+      return c.json(result.error(400, 'URL is required'))
     }
     if (!value.pageFile) {
-      return 'File is required'
+      return c.json(result.error(400, 'File is required'))
     }
-    if (!value.folderId || Number.isNaN(Number(value.folderId))) {
-      return 'Folder id should be a number'
+    if (!value.folderId || !isNumberString(value.folderId)) {
+      return c.json(result.error(400, 'FolderId id should be a number'))
     }
 
     return {
       title: value.title,
-      pageDesc: value.pageDesc,
+      pageDesc: value.pageDesc as string,
       pageUrl: value.pageUrl,
       pageFile: value.pageFile,
       folderId: Number(value.folderId),
     }
   }),
   async (c) => {
-    const formData = c.req.valid('form')
-    if (typeof formData === 'string') {
-      return c.json({ status: 'error', message: formData })
-    }
-    const { title, pageDesc, pageUrl, pageFile, folderId } = formData
+    const { title, pageDesc = '', pageUrl, pageFile, folderId } = c.req.valid('form')
+
     const contentUrl = crypto.randomUUID()
 
     let fileArraybuffer: ArrayBuffer
@@ -148,7 +113,10 @@ app.get(
   async (c) => {
     const { id } = c.req.valid('query')
 
-    const page = await getPage(c.env.DB, id)
+    const page = await getPageById(c.env.DB, {
+      id,
+      isDeleted: false,
+    })
     if (page) {
       return c.json(result.success(page))
     }

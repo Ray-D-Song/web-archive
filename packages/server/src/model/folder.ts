@@ -79,10 +79,9 @@ async function getFolderById(DB: D1Database, options: { id: number, isDeleted?: 
     WHERE id = ?
   `
   const folder = await DB.prepare(sql).bind(id).first<Folder>()
-  // todo fix type error
-  /* if (isNotNil(isDeleted) && folder.isDeleted !== Number(isDeleted)) {
+  if (isNotNil(isDeleted) && folder.isDeleted !== Number(isDeleted)) {
     return null
-  } */
+  }
   return folder
 }
 

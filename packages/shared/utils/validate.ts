@@ -6,6 +6,6 @@ export function isNotNil<T>(value: T): value is NonNullable<T> {
   return value !== null && value !== undefined
 }
 
-export function isNumberString(value: string | undefined | null | number | string[]): value is string {
+export function isNumberString(value: any): value is string {
   return isNotNil(value) && !Number.isNaN(Number(value))
 }
