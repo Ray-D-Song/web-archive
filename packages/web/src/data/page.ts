@@ -37,6 +37,32 @@ function queryPage(body: {
   })
 }
 
+function queryDeletedPage(body: {
+  pageNumber: number
+  pageSize: number
+}): Promise<{
+  list: Page[]
+  total: number
+}> {
+  return fetcher<{
+    list: Page[]
+    total: number
+  }>('/pages/query_deleted', {
+    method: 'POST',
+    body,
+  })
+}
+
+function restorePage(body: {
+  id: number
+  folderId?: number
+}): Promise<boolean> {
+  return fetcher<boolean>('/pages/restore_page', {
+    method: 'POST',
+    body,
+  })
+}
+
 function updatePage(body: {
   id: number
   folderId: number
@@ -52,4 +78,6 @@ export {
   deletePage,
   queryPage,
   updatePage,
+  queryDeletedPage,
+  restorePage,
 }

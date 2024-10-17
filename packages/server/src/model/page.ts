@@ -94,10 +94,42 @@ async function deletePageById(DB: D1Database, pageId: number) {
   return result.success
 }
 
+async function restorePage(DB: D1Database, options: { id: number, folderId: number }) {
+  const { id, folderId } = options
+  const sql = `
+    UPDATE pages
+    SET 
+      isDeleted = 0,
+      folderId = ?
+    WHERE id = ?
+  `
+  const result = await DB.prepare(sql).bind(folderId, id).run()
+  return result.success && result.meta.changes > 0
+}
+
+async function getPageById(DB: D1Database, options: { id: number, isDeleted?: boolean }) {
+  const { id, isDeleted } = options
+  const sql = `
+    SELECT 
+      *
+    FROM pages
+    WHERE id = ?
+  `
+  const page = await DB.prepare(sql).bind(id).first<Page>()
+  // todo fix type error
+  /* console.log(page)
+  if (isNotNil(isDeleted) && page?.isDeleted !== Number(isDeleted)) {
+    return null
+  } */
+  return page
+}
+
 export {
   selectPageTotalCount,
   queryPage,
   selectDeletedPageTotalCount,
   queryDeletedPage,
   deletePageById,
+  restorePage,
+  getPageById,
 }

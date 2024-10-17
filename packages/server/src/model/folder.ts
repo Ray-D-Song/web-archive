@@ -70,10 +70,27 @@ async function deleteFolderById(DB: D1Database, id: number) {
   }
 }
 
+async function getFolderById(DB: D1Database, options: { id: number, isDeleted?: boolean }) {
+  const { id, isDeleted } = options
+  const sql = `
+    SELECT 
+      *
+    FROM folders
+    WHERE id = ?
+  `
+  const folder = await DB.prepare(sql).bind(id).first<Folder>()
+  // todo fix type error
+  /* if (isNotNil(isDeleted) && folder.isDeleted !== Number(isDeleted)) {
+    return null
+  } */
+  return folder
+}
+
 export {
   deleteFolderById,
   checkFolderExists,
   insertFolder,
   updateFolder,
   selectAllFolders,
+  getFolderById,
 }

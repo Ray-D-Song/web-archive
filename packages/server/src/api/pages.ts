@@ -1,11 +1,12 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import type { D1Database } from '@cloudflare/workers-types/experimental'
-import { isNotNil, isNumberString } from '@web-archive/shared/utils'
+import { isNil, isNotNil, isNumberString } from '@web-archive/shared/utils'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 import type { Page } from '~/sql/types'
-import { deletePageById, queryDeletedPage, queryPage, selectDeletedPageTotalCount, selectPageTotalCount } from '~/model/page'
+import { deletePageById, getPageById, queryDeletedPage, queryPage, restorePage, selectDeletedPageTotalCount, selectPageTotalCount } from '~/model/page'
+import { getFolderById } from '~/model/folder'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -231,6 +232,49 @@ app.post(
     const pages = await queryDeletedPage(c.env.DB, { pageNumber, pageSize })
     const total = await selectDeletedPageTotalCount(c.env.DB)
     return c.json(result.success({ list: pages, total }))
+  },
+)
+
+app.post(
+  '/restore_page',
+  validator('json', (value, c) => {
+    if (isNil(value.id) || !isNumberString(value.id)) {
+      return c.json(result.error(400, 'ID is required and should be a number'))
+    }
+
+    if (isNotNil(value.folderId) && !isNumberString(value.folderId)) {
+      return c.json(result.error(400, 'Folder ID should be a number'))
+    }
+
+    return {
+      id: Number(value.id),
+      folderId: isNotNil(value.folderId) ? Number(value.folderId) : undefined,
+    }
+  }),
+  async (c) => {
+    const { id, folderId } = c.req.valid('json')
+    let pageFolderId = folderId
+    if (isNil(pageFolderId)) {
+      const page = await getPageById(c.env.DB, { id })
+      if (isNil(page)) {
+        return c.json(result.error(500, 'Page not found'))
+      }
+
+      pageFolderId = page.folderId
+    }
+    const folder = await getFolderById(c.env.DB, { id: pageFolderId })
+    if (isNil(folder)) {
+      return c.json(result.error(500, 'Folder not found'))
+    }
+    if (folder.isDeleted) {
+      return c.json(result.error(500, 'Folder is deleted'))
+    }
+
+    if (restorePage(c.env.DB, { id, folderId: pageFolderId })) {
+      return c.json(result.success(null))
+    }
+
+    return c.json(result.error(500, 'Failed to restore page'))
   },
 )
 

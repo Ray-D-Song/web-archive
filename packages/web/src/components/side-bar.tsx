@@ -137,7 +137,7 @@ function SideBar() {
             <Settings className="w-4 h-4 mr-2" />
             Settings
           </Button>
-          <Button variant="ghost" className="w-full text-sm justify-start gap-4">
+          <Button variant="ghost" className="w-full text-sm justify-start gap-4" onClick={() => navigate('/trash')}>
             <Trash className="w-4 h-4 mr-2" />
             Deleted
           </Button>
