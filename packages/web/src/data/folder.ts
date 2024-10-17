@@ -35,9 +35,27 @@ function updateFolder(id: number, name: string): Promise<Folder> {
   })
 }
 
+function queryDeletedFolder(body: { pageNumber: number, pageSize: number }): Promise<{ list: Array<Folder>, total: number }> {
+  return fetcher<{ list: Array<Folder>, total: number }>('/folders/query_deleted', {
+    method: 'POST',
+    body,
+  })
+}
+
+function restoreFolder(id: number): Promise<boolean> {
+  return fetcher<boolean>('/folders/restore_folder', {
+    method: 'POST',
+    body: {
+      id,
+    },
+  })
+}
+
 export {
   getAllFolder,
   deleteFolder,
   createFolder,
   updateFolder,
+  queryDeletedFolder,
+  restoreFolder,
 }

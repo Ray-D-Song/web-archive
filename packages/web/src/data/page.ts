@@ -53,13 +53,12 @@ function queryDeletedPage(body: {
   })
 }
 
-function restorePage(body: {
-  id: number
-  folderId?: number
-}): Promise<boolean> {
+function restorePage(id: number): Promise<boolean> {
   return fetcher<boolean>('/pages/restore_page', {
     method: 'POST',
-    body,
+    body: {
+      id,
+    },
   })
 }
 

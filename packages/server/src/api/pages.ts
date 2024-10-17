@@ -6,7 +6,7 @@ import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 import type { Page } from '~/sql/types'
 import { deletePageById, getPageById, queryDeletedPage, queryPage, restorePage, selectDeletedPageTotalCount, selectPageTotalCount } from '~/model/page'
-import { getFolderById } from '~/model/folder'
+import { getFolderById, restoreFolder } from '~/model/folder'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -267,10 +267,13 @@ app.post(
       return c.json(result.error(500, 'Folder not found'))
     }
     if (folder.isDeleted) {
-      return c.json(result.error(500, 'Folder is deleted'))
+      const restoreFolderResult = await restoreFolder(c.env.DB, pageFolderId)
+      if (!restoreFolderResult) {
+        return c.json(result.error(500, 'Failed to restore folder'))
+      }
     }
 
-    if (restorePage(c.env.DB, { id, folderId: pageFolderId })) {
+    if (await restorePage(c.env.DB, id)) {
       return c.json(result.success(null))
     }
 

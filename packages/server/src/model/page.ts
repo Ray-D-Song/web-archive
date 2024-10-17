@@ -94,16 +94,15 @@ async function deletePageById(DB: D1Database, pageId: number) {
   return result.success
 }
 
-async function restorePage(DB: D1Database, options: { id: number, folderId: number }) {
-  const { id, folderId } = options
+async function restorePage(DB: D1Database, id: number) {
   const sql = `
     UPDATE pages
     SET 
       isDeleted = 0,
-      folderId = ?
+      deletedAt = NULL
     WHERE id = ?
   `
-  const result = await DB.prepare(sql).bind(folderId, id).run()
+  const result = await DB.prepare(sql).bind(id).run()
   return result.success && result.meta.changes > 0
 }
 

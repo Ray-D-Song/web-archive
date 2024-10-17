@@ -86,6 +86,43 @@ async function getFolderById(DB: D1Database, options: { id: number, isDeleted?: 
   return folder
 }
 
+async function queryDeletedFolders(DB: D1Database, options: { pageNumber: number, pageSize: number }) {
+  const { pageNumber, pageSize } = options
+  const sql = `
+    SELECT 
+      *
+    FROM folders
+    WHERE isDeleted == 1
+    ORDER BY deletedAt DESC
+    LIMIT ? OFFSET ?
+  `
+  const sqlResult = await DB.prepare(sql).bind(pageSize, (pageNumber - 1) * pageSize).all<Folder>()
+  return sqlResult.results
+}
+
+async function selectDeletedFolderTotalCount(DB: D1Database) {
+  const sql = `
+    SELECT 
+      COUNT(id) as count
+    FROM folders
+    WHERE isDeleted == 1
+  `
+  const sqlResult = await DB.prepare(sql).first<{ count: number }>()
+  return sqlResult.count
+}
+
+async function restoreFolder(DB: D1Database, id: number) {
+  const sql = `
+    UPDATE folders
+    SET 
+      isDeleted = 0,
+      deletedAt = NULL
+    WHERE id = ?
+  `
+  const sqlResult = await DB.prepare(sql).bind(id).run()
+  return sqlResult.success
+}
+
 export {
   deleteFolderById,
   checkFolderExists,
@@ -93,4 +130,7 @@ export {
   updateFolder,
   selectAllFolders,
   getFolderById,
+  queryDeletedFolders,
+  selectDeletedFolderTotalCount,
+  restoreFolder,
 }

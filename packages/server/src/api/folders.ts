@@ -1,11 +1,10 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
-import type { D1Database } from '@cloudflare/workers-types/experimental'
-import { isNil, isNumberString } from '@web-archive/shared/utils'
+import { isNil, isNotNil, isNumberString } from '@web-archive/shared/utils'
 import { queryPage } from '~/model/page'
 import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
-import { checkFolderExists, deleteFolderById, insertFolder, selectAllFolders, updateFolder } from '~/model/folder'
+import { checkFolderExists, deleteFolderById, insertFolder, queryDeletedFolders, restoreFolder, selectAllFolders, selectDeletedFolderTotalCount, updateFolder } from '~/model/folder'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -102,6 +101,55 @@ app.put(
     }
 
     return c.json(result.success(true))
+  },
+)
+
+app.post(
+  '/query_deleted',
+  validator('json', (value, c) => {
+    if (isNotNil(value.pageNumber) && !isNumberString(value.pageNumber)) {
+      return c.json(result.error(400, 'Page number must be a number'))
+    }
+
+    if (isNotNil(value.pageNumber) && !isNumberString(value.pageNumber)) {
+      return c.json(result.error(400, 'Page number must be a number'))
+    }
+
+    return {
+      pageNumber: isNotNil(value.pageNumber) ? Number(value.pageNumber) : undefined,
+      pageSize: isNotNil(value.pageSize) ? Number(value.pageSize) : undefined,
+    }
+  }),
+  async (c) => {
+    const { pageNumber = 1, pageSize = 14 } = c.req.valid('json')
+
+    const folders = await queryDeletedFolders(c.env.DB, { pageNumber, pageSize })
+    const total = await selectDeletedFolderTotalCount(c.env.DB)
+    return c.json(result.success({
+      list: folders,
+      total,
+    }))
+  },
+)
+
+app.post(
+  '/restore_folder',
+  validator('json', (value, c) => {
+    if (isNil(value.id) || !isNumberString(value.id)) {
+      return c.json(result.error(400, 'ID is required'))
+    }
+
+    return {
+      id: Number(value.id),
+    }
+  }),
+  async (c) => {
+    const { id } = c.req.valid('json')
+    if (await restoreFolder(c.env.DB, id)) {
+      return c.json(result.success(true))
+    }
+
+    return c.json(result.error(500, 'Failed to restore folder'))
   },
 )
 
