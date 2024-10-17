@@ -9,6 +9,7 @@ declare module 'webext-bridge' {
       href: string
       folderId: string
       pageDesc: string
+      screenshot: string
     }, { success: boolean }>
     'get-current-page-data': ProtocolWithReturn<{ tabId: number }, {
       content: string

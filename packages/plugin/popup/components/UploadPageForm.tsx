@@ -26,16 +26,19 @@ async function scrapePageData() {
       content: '',
       href: '',
       folderId: '0',
+      screenshot: '',
     }
   }
 
   const pageData = await sendMessage('get-current-page-data', { tabId: tab.id }, 'background')
+  const screenshot = await Browser.tabs.captureVisibleTab(tab.windowId)
   return {
     title: pageData.title,
     pageDesc: pageData.pageDesc,
     content: pageData.content,
     href: pageData.href,
     folderId: '0',
+    screenshot,
   }
 }
 
@@ -63,6 +66,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
     content: '',
     href: '',
     folderId: '0',
+    screenshot: '',
   })
   const [loadingText, setLoadingText] = useState<string | ReactNode>('Scraping Page Data...')
   useEffect(() => {
@@ -109,6 +113,7 @@ function UploadPageForm({ setActivePage }: UploadPageFormProps) {
       content: uploadPageData.content,
       href: uploadPageData.href,
       folderId: uploadPageData.folderId,
+      screenshot: uploadPageData.screenshot,
     })
     if (success) {
       console.log('save success')

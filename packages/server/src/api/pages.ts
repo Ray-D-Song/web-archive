@@ -5,6 +5,7 @@ import type { HonoTypeUserInformation } from '~/constants/binding'
 import result from '~/utils/result'
 import { deletePageById, getPageById, insertPage, queryDeletedPage, queryPage, restorePage, selectDeletedPageTotalCount, selectPageTotalCount } from '~/model/page'
 import { getFolderById, restoreFolder } from '~/model/folder'
+import { formFileToArrayBuffer } from '~/utils/file'
 
 const app = new Hono<HonoTypeUserInformation>()
 
@@ -27,27 +28,25 @@ app.post(
       return c.json(result.error(400, 'FolderId id should be a number'))
     }
 
+    if (!value.screenshot) {
+      return c.json(result.error(400, 'Screenshot is required'))
+    }
+
     return {
       title: value.title,
       pageDesc: value.pageDesc as string,
       pageUrl: value.pageUrl,
       pageFile: value.pageFile,
       folderId: Number(value.folderId),
+      screenshot: value.screenshot,
     }
   }),
   async (c) => {
-    const { title, pageDesc = '', pageUrl, pageFile, folderId } = c.req.valid('form')
+    const { title, pageDesc = '', pageUrl, pageFile, folderId, screenshot } = c.req.valid('form')
 
     const contentUrl = crypto.randomUUID()
 
-    let fileArraybuffer: ArrayBuffer
-    if (typeof pageFile === 'string') {
-      const encoder = new TextEncoder()
-      fileArraybuffer = encoder.encode(pageFile).buffer
-    }
-    else {
-      fileArraybuffer = await pageFile.arrayBuffer()
-    }
+    const fileArraybuffer = await formFileToArrayBuffer(pageFile)
     const uploadFileResult = await c.env.BUCKET.put(contentUrl, fileArraybuffer)
     if (uploadFileResult === null) {
       return c.json({ status: 'error', message: 'Failed to upload file' })

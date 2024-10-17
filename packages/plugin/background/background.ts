@@ -58,6 +58,7 @@ onMessage('save-page', async ({ data }) => {
   form.append('pageUrl', href)
   form.append('folderId', folderId)
   form.append('pageFile', new Blob([content], { type: 'text/html' }))
+  form.append('screenshot', new Blob([data.screenshot], { type: 'image/png' }))
 
   try {
     await request('/pages/upload_new_page', {
