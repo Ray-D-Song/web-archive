@@ -1,0 +1,92 @@
+{
+  "name": "web-page-shelf",
+  "author": "Ray-D-Song",
+  "icons": {
+    "16": "assets/icon.png",
+    "48": "assets/icon.png",
+    "64": "assets/icon.png",
+    "128": "assets/icon.png"
+  },
+  "description": "SingleFile with categories and exhibition pages",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_icon": "assets/icon.png",
+    "default_popup": "popup/index.html"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "lib/browser-polyfill.min.js",
+        "lib/single-file-frames.js",
+        "lib/single-file-extension-frames.js"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "lib/single-file-hooks-frames.js"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "lib/browser-polyfill.min.js",
+        "lib/single-file-bootstrap.js"
+      ],
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "lib/browser-polyfill.min.js",
+        "contentScripts/main.js"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "background/background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "lib/single-file-hooks-frames.js",
+        "lib/browser-polyfill.min.js",
+        "contentScripts/content.js",
+        "chunks/*"
+      ]
+    }
+  ]
+}

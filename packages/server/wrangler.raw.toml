@@ -1,0 +1,15 @@
+name = "web-archive"
+pages_build_output_dir = "./src"
+compatibility_flags = [ "nodejs_compat_v2" ]
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "web-archive"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "web-archive"
+database_id = "xxxxxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+[vars]
+BEARER_TOKEN = "xxxx-xxxx-xxxxxxxxxxxx"

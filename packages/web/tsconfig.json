@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "baseUrl": "./",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "~/*": ["src/*"]
+    },
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
+  }
+}

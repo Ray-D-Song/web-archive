@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Service
+        run: pnpm build:service
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Verify Cloudflare API Token
+        run: |
+          echo "Verifying Cloudflare API Token..."
+          wrangler whoami
+
+      - name: Check and Create D1 Database
+        run: |
+          set -x
+          DB_LIST=$(wrangler d1 list --json)
+          DB_ID=$(echo $DB_LIST | jq -r '.[] | select(.name == "web-archive") | .uuid')
+
+          if [ -z "$DB_ID" ]; then
+            CREATE_OUTPUT=$(wrangler d1 create web-archive)
+            DB_ID=$(echo "$CREATE_OUTPUT" | sed -n 's/.*database_id = "\([^"]*\)".*/\1/p')
+          else
+            echo "Found existing web-archive database"
+          fi
+
+          echo "Database ID: $DB_ID"
+          echo "DB_ID=$DB_ID" >> $GITHUB_ENV
+
+      - name: update wrangler.toml
+        run: |
+          cd dist/service
+          sed -i 's/database_id = ".*"/database_id = "'$DB_ID'"/' wrangler.toml
+
+      - name: Execute init.sql
+        run: |
+          cd dist/service
+          wrangler d1 execute web-archive --remote --file=./init.sql
+
+      - name: Check and Create R2 Bucket
+        run: |
+          BUCKET_LIST=$(wrangler r2 bucket list)
+          if echo "$BUCKET_LIST" | grep -q "web-archive"; then
+            echo "Bucket already exists"
+          else
+            echo "Creating new bucket"
+            wrangler r2 bucket create web-archive
+          fi
+
+      - name: Create Pages project if not exists
+        run: |
+          if ! wrangler pages project list | grep -q "web-archive"; then
+            wrangler pages project create web-archive --production-branch=main
+          fi
+
+      - name: Deploy
+        run: cd dist/service && wrangler pages deploy
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

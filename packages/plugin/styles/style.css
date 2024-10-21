@@ -1,0 +1,39 @@
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  border-radius: 5px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgb(55 65 81); 
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(31 41 55); 
+
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(21 31 45); 
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

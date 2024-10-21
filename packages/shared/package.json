@@ -1,0 +1,15 @@
+{
+  "name": "@web-archive/shared",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "exports": {
+    "./types": "./types/index.ts",
+    "./utils": "./utils/index.ts",
+    "./components/*": "./components/*.tsx",
+    "./global.css": "./global.css"
+  }
+}
