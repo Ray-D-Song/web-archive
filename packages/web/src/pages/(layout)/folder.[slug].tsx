@@ -1,7 +1,7 @@
 import { isNil } from '@web-archive/shared/utils'
 import { useOutletContext } from 'react-router-dom'
 import { useInfiniteScroll, useRequest } from 'ahooks'
-import { useContext, useEffect, useRef } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import type { Ref } from '@web-archive/shared/components/scroll-area'
 import { ScrollArea } from '@web-archive/shared/components/scroll-area'
 import { Button } from '@web-archive/shared/components/button'
@@ -61,8 +61,11 @@ function FolderPage() {
   })
 
   const navigate = useNavigate()
-  const handleItemClick = (page: Page) => {
-    navigate(`/page/:slug`, { params: { slug: String(page.id) } })
+  const handleItemClick = (page: Page, event: React.MouseEvent) => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey)
+      window.open(`/#/page/${page.id}`, '_blank')
+    else
+      navigate(`/page/:slug`, { params: { slug: String(page.id) } })
   }
 
   const { view } = useContext(AppContext)

@@ -13,7 +13,7 @@ import NewFolderDialog from './new-folder-dialog'
 import EditFolderDialog from './edit-folder-dialog'
 import { deleteFolder, getAllFolder } from '~/data/folder'
 import emitter from '~/utils/emitter'
-import { useNavigate } from '~/router'
+import { Link, useNavigate } from '~/router'
 
 function getNextFolderId(folders: Array<FolderType>, index: number) {
   if (index === 0 && folders.length === 1) {
@@ -38,9 +38,6 @@ function SidebarFolderMenu({ openedFolder, setOpenedFolder, className }: Sidebar
 
   const { data: folders, refresh, mutate: setFolders, loading: foldersLoading } = useRequest(getAllFolder)
 
-  const handleFolderClick = (id: number) => {
-    setOpenedFolder(id)
-  }
   emitter.on('refreshSideBar', refresh)
 
   const handleDeleteFolder = async (folderId: number) => {
@@ -106,16 +103,19 @@ function SidebarFolderMenu({ openedFolder, setOpenedFolder, className }: Sidebar
               : (
                   folders?.map(folder => (
                     <SidebarMenuItem key={folder.id}>
-                      <SidebarMenuButton>
-                        <Folder
-                          name={folder.name}
-                          id={folder.id}
-                          isOpen={openedFolder === folder.id}
-                          onClick={handleFolderClick}
-                          onDelete={handleDeleteFolder}
-                          onEdit={handleEditFolder}
-                        />
-                      </SidebarMenuButton>
+                      <Link to="/folder/:slug" params={{ slug: folder.id.toString() }}>
+                        <SidebarMenuButton>
+                          <Folder
+                            name={folder.name}
+                            id={folder.id}
+                            isOpen={openedFolder === folder.id}
+                            onDelete={handleDeleteFolder}
+                            onEdit={handleEditFolder}
+                          />
+
+                        </SidebarMenuButton>
+                      </Link>
+
                     </SidebarMenuItem>
                   ))
                 )}

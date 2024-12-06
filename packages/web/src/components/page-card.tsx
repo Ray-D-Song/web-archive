@@ -9,14 +9,12 @@ import { useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Badge } from '@web-archive/shared/components/badge'
 import ScreenshotView from './screenshot-view'
-import { useNavigate } from '~/router'
 import { updatePageShowcase } from '~/data/page'
 import CardEditDialog from '~/components/card-edit-dialog'
 import TagContext from '~/store/tag'
+import { Link } from '~/router'
 
 function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) => void }) {
-  const navigate = useNavigate()
-
   const { tagCache, refreshTagCache } = useContext(TagContext)
   const bindTags = tagCache?.filter(tag => tag.pageIds.includes(page.id)) ?? []
   const tagBadgeList = bindTags.map((tag) => {
@@ -25,10 +23,7 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
 
   const location = useLocation()
   const isShowcased = location.pathname.startsWith('/showcase')
-
-  const handleClickPageCard = (page: Page) => {
-    navigate(isShowcased ? '/showcase/page/:slug' : '/page/:slug', { params: { slug: String(page.id) } })
-  }
+  const redirectTo = isShowcased ? `/showcase/page/:slug` : `/page/:slug`
 
   const handleClickPageUrl = (e: React.MouseEvent, page: Page) => {
     e.stopPropagation()
@@ -68,26 +63,29 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
           <CardEditDialog open={openCardEditDialog} onOpenChange={setOpenCardEditDialog} pageId={page.id} />
         )
       }
+
       <Card
         key={page.id}
-        onClick={() => handleClickPageCard(page)}
         className="cursor-pointer hover:shadow-lg transition-shadow flex flex-col relative group overflow-hidden"
       >
-        <CardHeader>
-          <CardTitle className="leading-8 text-lg line-clamp-2">{page.title}</CardTitle>
-          <CardDescription className="space-x-1">
-            {tagBadgeList}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1">
-          <ScreenshotView
-            screenshotId={page.screenshotId}
-            className="w-full mb-2"
-            loadingClassName="w-full h-48"
-          >
-          </ScreenshotView>
-          <p className="h-auto text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{page.pageDesc}</p>
-        </CardContent>
+        <Link to={redirectTo} params={{ slug: page.id.toString() }}>
+          <CardHeader>
+            <CardTitle className="leading-8 text-lg line-clamp-2">{page.title}</CardTitle>
+            <CardDescription className="space-x-1">
+              {tagBadgeList}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1">
+            <ScreenshotView
+              screenshotId={page.screenshotId}
+              className="w-full mb-2"
+              loadingClassName="w-full h-48"
+            >
+            </ScreenshotView>
+            <p className="h-auto text-sm text-gray-600 dark:text-gray-400 line-clamp-3">{page.pageDesc}</p>
+          </CardContent>
+        </Link>
+
         <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 sm:opacity-0 transition-opacity">
           {
             !isShowcased && (
