@@ -95,5 +95,8 @@
   "model-name-is-required": "请输入模型名称",
   "please-enter-a-valid-api-url": "请输入有效的 API URL",
   "select-generate-tag-language": "选择生成标签的语言",
-  "select-service-type": "选择服务类型"
+  "select-service-type": "选择服务类型",
+  "data": "数据",
+  "export-all-data": "导出所有数据",
+  "are-you-sure-to-export-all-data": "导出所有数据可能会耗费较多时间, 是否需要导出?"
 }

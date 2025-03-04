@@ -95,5 +95,8 @@
   "ai-tag-config-saved": "AI Tag config saved",
   "select-service-type": "Select Service Type",
   "select-generate-tag-language": "Select Generate Tag Language",
-  "model": "Model"
+  "model": "Model",
+  "data": "Data",
+  "export-all-data": "Export All Data",
+  "are-you-sure-to-export-all-data": "Export all data may take a long time. Are you sure to export all data? "
 }

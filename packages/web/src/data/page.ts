@@ -20,7 +20,7 @@ function deletePage(page: Page): Promise<Page> {
   })
 }
 
-function queryPage(body: {
+function queryPage(body?: {
   folderId?: string
   pageNumber: number
   pageSize: number
@@ -35,7 +35,7 @@ function queryPage(body: {
     total: number
   }>('/pages/query', {
     method: 'POST',
-    body,
+    body: body ?? {},
   })
 }
 
@@ -114,6 +114,18 @@ function queryAllPageIds(folderId: number): Promise<number[]> {
   })
 }
 
+async function getContentByContentUrl(contentUrl: string) {
+  const url = `/api/pages/content_by_content_url?${new URLSearchParams({ contentUrl }).toString()}`
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'text/html',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    },
+  })
+  return await res.blob()
+}
+
 export {
   getPageDetail,
   deletePage,
@@ -126,4 +138,5 @@ export {
   getPageScreenshot,
   getRecentSavePage,
   queryAllPageIds,
+  getContentByContentUrl,
 }

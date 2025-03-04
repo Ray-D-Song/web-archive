@@ -8,6 +8,7 @@ import { Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import LanguageCombobox from '@web-archive/shared/components/language-combobox'
 import AITagSettingCollapsible from './ai-tag-setting-collapsible'
+import ExportDataCollapsible from './export-data-collapsible'
 import { useShouldShowRecent } from '~/hooks/useShouldShowRecent'
 
 function SettingDialog({ open, setOpen }: { open: boolean, setOpen: (open: boolean) => void }) {
@@ -62,6 +63,9 @@ function SettingDialog({ open, setOpen }: { open: boolean, setOpen: (open: boole
           </div>
           <div>
             <AITagSettingCollapsible></AITagSettingCollapsible>
+          </div>
+          <div>
+            <ExportDataCollapsible></ExportDataCollapsible>
           </div>
         </div>
       </DialogContent>

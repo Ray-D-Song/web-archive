@@ -8,6 +8,7 @@
     "@generouted/react-router": "^1.19.6",
     "@mozilla/readability": "^0.5.0",
     "@tailwindcss/line-clamp": "^0.4.4",
+    "@zip.js/zip.js": "^2.7.57",
     "react-router-dom": "^6.24.0"
   },
   "devDependencies": {

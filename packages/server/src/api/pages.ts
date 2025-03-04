@@ -380,6 +380,31 @@ app.get(
   },
 )
 
+app.get(
+  '/content_by_content_url',
+  validator('query', (value, c) => {
+    if (!value.contentUrl || typeof value.contentUrl !== 'string') {
+      return c.json(result.error(400, 'Content URL is required'))
+    }
+
+    return {
+      contentUrl: value.contentUrl,
+    }
+  }),
+  async (c) => {
+    const { contentUrl } = c.req.valid('query')
+    const content = await c.env.BUCKET.get(contentUrl)
+    if (!content) {
+      return c.json(result.error(500, 'Page data not found'))
+    }
+
+    c.res.headers.set('cache-control', 'private, max-age=604800')
+    return c.html(
+      await content.text(),
+    )
+  },
+)
+
 app.put(
   '/update_showcase',
   validator('json', (value, c) => {
