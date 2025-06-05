@@ -1,0 +1,2 @@
+-- Migration number: 0002 	 2024-10-22T14:31:46.361Z
+DROP TABLE IF EXISTS stores;

@@ -1,0 +1,2 @@
+-- Migration number: 0004 	 2024-10-28T13:10:49.124Z
+DROP TABLE IF EXISTS tags;

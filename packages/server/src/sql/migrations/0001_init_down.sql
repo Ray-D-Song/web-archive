@@ -1,0 +1,3 @@
+-- Migration number: 0001 	 2024-10-22T09:00:54.587Z
+DROP TABLE IF EXISTS pages;
+DROP TABLE IF EXISTS folders;
