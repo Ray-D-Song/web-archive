@@ -1,25 +1,59 @@
-## ~~Github Actions 一键部署~~
-> [!WARNING]
-> 由于 Cloudflare 的变动，一键部署功能暂时不可用。请使用命令部署。
+## GitHub Actions 部署
 
+### 1. 在 GitHub 上 Fork 本项目
 
-~~点击上面的按钮，按照 Cloudflare 的指引完成部署。~~
+先将本项目 Fork 到自己的 GitHub 账号下，后续的部署配置和工作流运行都在 Fork 后的仓库中完成。
+
+### 2. 准备 Cloudflare 凭据
+
+你需要在 Cloudflare 中准备以下两个 GitHub Actions Secrets：
+
+- `CLOUDFLARE_ACCOUNT_ID`：Cloudflare 账号 ID，可参考 [Find account and zone IDs · Cloudflare Fundamentals docs](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/) 获取。
+- `CLOUDFLARE_API_TOKEN`：用于 GitHub Actions 调用 Cloudflare API 的令牌，可在 [API 令牌 | Cloudflare](https://dash.cloudflare.com/profile/api-tokens) 页面创建。
 
 > [!IMPORTANT]
-> ~~R2 存储桶是需要在 Cloudflare 面板上手动开通的功能，请开通后再进行部署或者失败后 re-run Github Actions。~~
-> ~~仅需开通 R2 功能，不需要创建存储桶，存储桶会在部署时自动创建。~~
+> `R2` 功能需要先在 Cloudflare 面板中手动开通。请在开通后再进行部署；如果首次运行失败，开通后重新运行 GitHub Actions workflow 即可。
+> 这里只需要开通 `R2` 功能，不需要手动创建存储桶，部署时会自动创建 `web-archive` 存储桶。
 
 > [!NOTE]
-> ~~创建令牌时，直接选择 `编辑 Cloudflare Workers` 模版，再手动添加 `D1 编辑` 权限。~~
+> 创建令牌时，直接选择 `编辑 Cloudflare Workers` 模板，再手动添加 `D1 编辑` 权限。
+> 账户资源选择“所有账户”，区域资源选择“所有区域”即可。
 
-![permissions](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/perm_zh.png)
+Cloudflare API 令牌权限配置可参考下图：
 
-~~部署后请尽快登录，首个登录的用户会被设置为管理员。~~
+![Cloudflare API 令牌权限配置示意](https://raw.githubusercontent.com/ray-d-song/web-archive/main/docs/imgs/perm_zh.png)
+
+### 3. 在 Fork 仓库中配置 GitHub Actions Secrets
+
+进入 Fork 仓库的 `Settings -> Secrets and variables -> Actions` 页面，分别创建以下两个仓库 Secret：
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN`
+
+Secrets 配置页面如下：
+
+![GitHub Actions Secrets 配置页面](./imgs/actions_secrets.png)
+
+### 4. 启用 GitHub Actions 并运行部署 workflow
+
+进入 Fork 仓库的 `Actions` 页面；如果 GitHub 提示该 Fork 仓库的 Actions 尚未启用，先点击启用。
+
+![启用 GitHub Actions](./imgs/actions_enable.png)
+
+启用后，在工作流列表中选择 `Deploy`，再点击 `Run workflow` 手动触发部署。
+
+![运行 Deploy workflow](./imgs/actions_deploy.png)
+
+> [!IMPORTANT]
+> 部署后请尽快登录，首个登录的用户会被设置为管理员。
+
+部署完成后，可以在 Cloudflare Workers 页面中找到服务的访问链接。访问时请使用不带 hash 的正式链接，不要复制带随机 hash 的预览链接。
+![Cloudflare Workers 页面中的访问链接位置](./imgs/cloudflare_workers_page.png)
 
 ## 命令部署
 
-要求本地安装了 node 环境。  
-命令部署时更新比较麻烦, 推荐实用 Github actions 部署。  
+要求本地已安装 Node 环境。
+命令部署的更新流程相对更繁琐，推荐优先使用 GitHub Actions 部署。
 ### 0. 下载代码
 在 release 页面下载最新的 service.zip，解压后在根目录执行后续操作。
 
@@ -116,6 +150,6 @@ The project you specified does not exist: "web-archive". Would you like to creat
 
 ## 如何更新
 
-使用 Github Actions 部署时，会自动创建一个 fork 仓库，更新只需要 sync fork 即可。
+使用 GitHub Actions 部署时，会自动创建一个 Fork 仓库，更新时只需要执行 Sync fork 即可。
 
 命令部署时，需要下载最新的代码并手动更新。
