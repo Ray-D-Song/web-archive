@@ -148,8 +148,115 @@ The project you specified does not exist: "web-archive". Would you like to creat
 ✨ Deployment complete! Take a peek over at https://web-archive-xxxx.pages.dev
 ```
 
+## Docker Local Deployment
+
+Deploy Web Archive locally using Docker without relying on Cloudflare. Powered by [node-cf-worker](https://github.com/Ray-D-Song/node-cf-worker) runtime, using local SQLite for data storage.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-started/) installed
+
+### Quick Start
+
+```bash
+# Pull the image
+docker pull ghcr.io/ray-d-song/web-archive:latest
+
+# Run with persistent data
+docker run -d \
+  -p 8787:8787 \
+  -v web-archive-data:/app/service/.wrangler/state \
+  ghcr.io/ray-d-song/web-archive:latest
+```
+
+Or build from source:
+
+```bash
+git clone https://github.com/ray-d-song/web-archive.git
+cd web-archive
+docker build -t web-archive .
+docker run -d \
+  -p 8787:8787 \
+  -v web-archive-data:/app/service/.wrangler/state \
+  web-archive
+```
+
+### Docker Compose (Recommended)
+
+Create a `docker-compose.yml`:
+
+```yaml
+services:
+  web-archive:
+    image: ghcr.io/ray-d-song/web-archive:latest
+    container_name: web-archive
+    ports:
+      - "8787:8787"
+    volumes:
+      - web-archive-data:/app/service/.wrangler/state
+    restart: unless-stopped
+
+volumes:
+  web-archive-data:
+```
+
+```bash
+docker compose up -d
+```
+
+### Configuration
+
+The service listens on port `8787` by default. Access the web interface at `http://localhost:8787`.
+
+> [!IMPORTANT]
+> After deployment, log in as soon as possible. The first user to log in will be assigned as the administrator.
+
+All data is stored in the mounted volume `web-archive-data`, including archived pages, user data, and configuration. Data persists across container restarts.
+
+To use a different port, modify the port mapping in `docker run` or `docker-compose.yml`, e.g. `-p 3000:8787` maps the service to your local port `3000`.
+
+### AI Configuration
+
+Web Archive supports AI-powered auto-tagging. Configure an OpenAI-compatible API via environment variables:
+
+```bash
+docker run -d \
+  -p 8787:8787 \
+  -v web-archive-data:/app/service/.wrangler/state \
+  -e OPENAI_API_KEY="sk-xxx" \
+  -e OPENAI_BASE_URL="https://api.openai.com/v1" \
+  ghcr.io/ray-d-song/web-archive:latest
+```
+
+Docker Compose example:
+
+```yaml
+services:
+  web-archive:
+    image: ghcr.io/ray-d-song/web-archive:latest
+    ports:
+      - "8787:8787"
+    volumes:
+      - web-archive-data:/app/service/.wrangler/state
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - OPENAI_BASE_URL=https://api.openai.com/v1
+    restart: unless-stopped
+
+volumes:
+  web-archive-data:
+```
+
+> [!NOTE]
+> - `OPENAI_BASE_URL` defaults to `https://api.openai.com/v1`. Specify a custom URL if using another compatible service (e.g. Ollama `http://localhost:11434/v1`).
+> - For custom model mapping (translating Cloudflare model IDs to your provider's model names), mount a custom `wrangler.toml`. See [node-cf-worker docs](https://github.com/Ray-D-Song/node-cf-worker).
+
 ## How to update
 
-Use Github Actions deployment, the latest code will be automatically synced to the fork repository.
+For Docker deployment, update by pulling the latest image and restarting the container:
 
-Command deployment needs to download the latest code and update manually.
+```bash
+docker compose pull && docker compose up -d
+```
+
+For Github Actions deployment, the latest code will be automatically synced to the fork repository.

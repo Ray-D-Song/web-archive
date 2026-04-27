@@ -24,7 +24,18 @@ The server is based on the full set of services of Cloudflare Worker, including 
 - Reading mode
 
 ## Deploy
-You can refer to the [deploy document](https://web-archive-docs.pages.dev/en/deploy.html) to deploy.
+
+### Cloudflare (Recommended)
+You can refer to the [deploy document](https://web-archive-docs.pages.dev/en/deploy.html) to deploy on Cloudflare.
+
+### Docker
+Run locally with a single command:
+
+```bash
+docker run -d -p 8787:8787 -v web-archive-data:/app/service/.wrangler/state ghcr.io/ray-d-song/web-archive:latest
+```
+
+For more details, see the [Docker deployment guide](https://web-archive-docs.pages.dev/en/deploy.html#docker-local-deployment).
 
 After deployment, in the browser plugin, enter the service address and key to use.
 

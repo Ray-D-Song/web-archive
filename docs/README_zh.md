@@ -19,7 +19,18 @@ Web Archive 是一个网页归档工具，包含以下几个部分：
 - 阅读模式
 
 ## 部署
-可以参考 [部署文档](https://web-archive-docs.pages.dev/deploy.html) 进行部署。  
+
+### Cloudflare（推荐）
+可以参考 [部署文档](https://web-archive-docs.pages.dev/deploy.html) 部署到 Cloudflare。
+
+### Docker
+一行命令即可本地运行：
+
+```bash
+docker run -d -p 8787:8787 -v web-archive-data:/app/service/.wrangler/state ghcr.io/ray-d-song/web-archive:latest
+```
+
+详情请参阅 [Docker 部署指南](https://web-archive-docs.pages.dev/deploy.html#docker-本地部署)。  
 部署完成后，在浏览器插件中输入服务地址和 key 即可使用。
 
 插件下载：

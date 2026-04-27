@@ -148,7 +148,116 @@ The project you specified does not exist: "web-archive". Would you like to creat
 ✨ Deployment complete! Take a peek over at https://web-archive-xxxx.pages.dev
 ```
 
+## Docker 本地部署
+
+无需依赖 Cloudflare，使用 Docker 在本地部署 Web Archive。基于 [node-cf-worker](https://github.com/Ray-D-Song/node-cf-worker) 运行时，使用本地 SQLite 存储数据。
+
+### 前置条件
+
+- 已安装 [Docker](https://docs.docker.com/get-started/)
+
+### 快速开始
+
+```bash
+# 拉取镜像
+docker pull ghcr.io/ray-d-song/web-archive:latest
+
+# 运行并持久化数据
+docker run -d \
+  -p 8787:8787 \
+  -v web-archive-data:/app/service/.wrangler/state \
+  ghcr.io/ray-d-song/web-archive:latest
+```
+
+也可以从源码构建：
+
+```bash
+git clone https://github.com/ray-d-song/web-archive.git
+cd web-archive
+docker build -t web-archive .
+docker run -d \
+  -p 8787:8787 \
+  -v web-archive-data:/app/service/.wrangler/state \
+  web-archive
+```
+
+### Docker Compose（推荐）
+
+创建 `docker-compose.yml`：
+
+```yaml
+services:
+  web-archive:
+    image: ghcr.io/ray-d-song/web-archive:latest
+    container_name: web-archive
+    ports:
+      - "8787:8787"
+    volumes:
+      - web-archive-data:/app/service/.wrangler/state
+    restart: unless-stopped
+
+volumes:
+  web-archive-data:
+```
+
+```bash
+docker compose up -d
+```
+
+### 配置说明
+
+服务默认监听 `8787` 端口，访问 `http://localhost:8787` 即可打开 Web 界面。
+
+> [!IMPORTANT]
+> 部署后请尽快登录，首个登录的用户会被设置为管理员。
+
+所有数据存储在挂载的卷 `web-archive-data` 中，包括归档页面、用户数据和配置信息，容器重启不会丢失。
+
+如需自定义端口，修改 `docker run` 或 `docker-compose.yml` 中的端口映射即可，例如 `-p 3000:8787` 将服务映射到本机 `3000` 端口。
+
+### AI 配置
+
+Web Archive 支持 AI 自动标签分类功能。在 Docker 部署时，通过环境变量配置 OpenAI 兼容的 API：
+
+```bash
+docker run -d \
+  -p 8787:8787 \
+  -v web-archive-data:/app/service/.wrangler/state \
+  -e OPENAI_API_KEY="sk-xxx" \
+  -e OPENAI_BASE_URL="https://api.openai.com/v1" \
+  ghcr.io/ray-d-song/web-archive:latest
+```
+
+Docker Compose 示例：
+
+```yaml
+services:
+  web-archive:
+    image: ghcr.io/ray-d-song/web-archive:latest
+    ports:
+      - "8787:8787"
+    volumes:
+      - web-archive-data:/app/service/.wrangler/state
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - OPENAI_BASE_URL=https://api.openai.com/v1
+    restart: unless-stopped
+
+volumes:
+  web-archive-data:
+```
+
+> [!NOTE]
+> - `OPENAI_BASE_URL` 默认为 `https://api.openai.com/v1`，如使用其他兼容服务（如 Ollama `http://localhost:11434/v1`）需手动指定。
+> - 如需自定义模型映射（将 Cloudflare 模型 ID 映射到实际模型名），可以通过挂载自定义 `wrangler.toml` 实现，详见 [node-cf-worker 文档](https://github.com/Ray-D-Song/node-cf-worker)。
+
 ## 如何更新
+
+使用 Docker 部署时，更新只需要重新拉取镜像并重启容器：
+
+```bash
+docker compose pull && docker compose up -d
+```
 
 使用 GitHub Actions 部署时，会自动创建一个 Fork 仓库，更新时只需要执行 Sync fork 即可。
 
