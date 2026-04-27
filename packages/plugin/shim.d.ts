@@ -1,5 +1,5 @@
 import type { ProtocolWithReturn } from 'webext-bridge'
-import type { AITagConfig, Page, Tag } from '@web-archive/shared/types'
+import type { AITagConfig, Tag } from '@web-archive/shared/types'
 import type { SeriableSingleFileTask } from './background/processor'
 import type { LoadStage, SingleFileSetting } from '~/utils/singleFile'
 
