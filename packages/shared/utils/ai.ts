@@ -5,23 +5,90 @@ export type GenerateTagProps = {
   pageDesc: string
 } & AITagConfig
 
-interface GenerateTagResponse {
-  choices: [
-    {
-      message: {
-        content: string
-        role: string
-      }
-    },
-  ]
-  created: number
-  id: string
-  model: string
-  usage: {
-    completion_tokens: number
-    prompt_tokens: number
-    total_tokens: number
+export function normalizeOpenAIApiUrl(apiUrl: string): string {
+  const trimmed = apiUrl.trim().replace(/\/+$/, '')
+  try {
+    const url = new URL(trimmed)
+    const pathname = url.pathname.replace(/\/+$/, '')
+    if (pathname === '') {
+      url.pathname = '/v1/chat/completions'
+    }
+    else if (pathname.endsWith('/v1')) {
+      url.pathname = `${pathname}/chat/completions`
+    }
+    else {
+      url.pathname = pathname
+    }
+    return url.toString()
   }
+  catch {
+    return trimmed
+  }
+}
+
+function extractTagsArray(value: unknown): string[] | null {
+  if (typeof value !== 'object' || value === null) {
+    return null
+  }
+  const tags = (value as { tags?: unknown }).tags
+  if (!Array.isArray(tags)) {
+    return null
+  }
+  return tags
+    .map(tag => String(tag).trim())
+    .filter(Boolean)
+    .slice(0, 5)
+}
+
+export function parseTagsFromAIResponse(raw: unknown): string[] {
+  if (typeof raw === 'string') {
+    const withoutThink = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
+    const codeBlockMatch = withoutThink.match(/```(?:json)?([\s\S]*?)```/i)
+    const cleaned = (codeBlockMatch ? codeBlockMatch[1] : withoutThink).trim()
+
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(cleaned)
+    }
+    catch {
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/) || withoutThink.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) {
+        throw new Error('Failed to parse response, please try again or change model')
+      }
+      parsed = JSON.parse(jsonMatch[0])
+    }
+
+    const tags = extractTagsArray(parsed)
+    if (!tags) {
+      throw new Error('Failed to parse response, please try again or change model')
+    }
+    return tags
+  }
+
+  if (typeof raw === 'object' && raw !== null) {
+    const directTags = extractTagsArray(raw)
+    if (directTags) {
+      return directTags
+    }
+
+    const record = raw as Record<string, unknown>
+    if (record.response !== undefined && record.response !== null && record.response !== '') {
+      return parseTagsFromAIResponse(record.response)
+    }
+
+    if (Array.isArray(record.choices) && record.choices.length > 0) {
+      const firstChoice = record.choices[0] as { message?: { content?: unknown } } | undefined
+      if (firstChoice?.message?.content) {
+        return parseTagsFromAIResponse(firstChoice.message.content)
+      }
+    }
+
+    if (record.result !== undefined && record.result !== null && record.result !== '') {
+      return parseTagsFromAIResponse(record.result)
+    }
+  }
+
+  throw new Error('Failed to parse response, please try again or change model')
 }
 
 export function buildGenerateTagMessage(props: {
@@ -63,7 +130,7 @@ export async function generateTagByOpenAI(props: GenerateTagProps): Promise<Arra
   if (props.type !== 'openai') {
     throw new Error('Invalid AI tag config')
   }
-  const res = await fetch(props.apiUrl, {
+  const res = await fetch(normalizeOpenAIApiUrl(props.apiUrl), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -76,17 +143,25 @@ export async function generateTagByOpenAI(props: GenerateTagProps): Promise<Arra
   })
 
   if (!res.ok) {
-    const content = await res.json()
-    throw new Error(content.error.message)
+    const text = await res.text()
+    let errorMessage = res.statusText || 'Request failed'
+    try {
+      const content = JSON.parse(text) as { error?: { message?: string }, message?: string }
+      errorMessage = content?.error?.message || content?.message || errorMessage
+    }
+    catch {
+      if (text.trim()) {
+        errorMessage = text.trim()
+      }
+    }
+    throw new Error(errorMessage)
   }
 
   try {
-    const data = await res.json() as GenerateTagResponse
-    const content = data.choices[0].message.content
-    const tagJson = JSON.parse(content)
-    return tagJson.tags.slice(0, 5)
+    const data = await res.json()
+    return parseTagsFromAIResponse(data)
   }
-  catch (error) {
+  catch {
     throw new Error('Failed to parse response, please try again or change model')
   }
 }

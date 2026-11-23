@@ -1,4 +1,4 @@
-import { buildGenerateTagMessage, isNil, isNumberString } from '@web-archive/shared/utils'
+import { buildGenerateTagMessage, isNil, isNumberString, parseTagsFromAIResponse } from '@web-archive/shared/utils'
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 import { z } from 'zod'
@@ -120,11 +120,8 @@ app.post(
         if (res instanceof ReadableStream) {
           throw new TypeError('Failed to parse response stream')
         }
-        if (res.response === undefined) {
-          throw new TypeError('Failed to parse response, please try again or change model')
-        }
-        const { tags } = JSON.parse(res.response)
-        return c.json(result.success(tags.slice(0, 5)))
+        const tags = parseTagsFromAIResponse(res)
+        return c.json(result.success(tags))
       }
       catch (error) {
         console.log(res)

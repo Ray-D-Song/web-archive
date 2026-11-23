@@ -111,7 +111,7 @@ function AITagSettingCollapsible() {
                   <FormItem>
                     <FormLabel>{t('aiTag-service-type')}</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder={t('select-service-type')}></SelectValue>
                         </SelectTrigger>
@@ -141,7 +141,7 @@ function AITagSettingCollapsible() {
                       {t('aiTag-generate-tag-language')}
                     </FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder={t('select-generate-tag-language')}></SelectValue>
                         </SelectTrigger>
@@ -248,7 +248,7 @@ function AITagSettingCollapsible() {
                   {t('save')}
                 </Button>
                 <AITagTestConnectionButton
-                  config={form.getValues()}
+                  config={form.watch()}
                   onValidate={validateForm}
                 />
               </div>

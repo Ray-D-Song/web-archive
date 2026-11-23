@@ -60,7 +60,7 @@ function TagInputWithCache({ onValueChange, title, description }: TagInputWithCa
     },
     getCache: () => {
       const cache = localStorage.getItem('aiTagConfig')
-      return cache ? JSON.parse(cache) : []
+      return cache ? JSON.parse(cache) : undefined
     },
   })
 
