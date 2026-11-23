@@ -3,6 +3,7 @@ import type { Bindings, HonoTypeUserInformation } from './constants/binding'
 import tokenMiddleware from './middleware/token'
 import data from './api/data'
 import showcase from '~/api/showcase'
+import share from '~/api/share'
 import pages from '~/api/pages'
 import auth from '~/api/auth'
 import folders from '~/api/folders'
@@ -32,6 +33,7 @@ app.get('/', async (c) => {
 
 const api = new Hono<HonoTypeUserInformation>()
 api.route('/showcase', showcase)
+api.route('/share', share)
 
 api.use(tokenMiddleware)
 

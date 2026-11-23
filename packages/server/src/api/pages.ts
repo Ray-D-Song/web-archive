@@ -8,6 +8,7 @@ import { clearDeletedPage, deletePageById, getPageById, insertPage, queryAllPage
 import { getFolderById, restoreFolder } from '~/model/folder'
 import { getFileFromBucket, saveFileToBucket } from '~/utils/file'
 import { updateShowcase } from '~/model/showcase'
+import { createOrGetPageShareToken, getPageShareToken, revokePageShareToken } from '~/model/store'
 import { updateBindPageByTagName } from '~/model/tag'
 
 const app = new Hono<HonoTypeUserInformation>()
@@ -428,6 +429,63 @@ app.get(
     }
 
     return c.body(await screenshot.arrayBuffer())
+  },
+)
+
+app.get(
+  '/share',
+  validator('query', (value, c) => {
+    if (isNil(value.pageId) || !isNumberString(value.pageId)) {
+      return c.json(result.error(400, 'Page ID is required and should be a number'))
+    }
+    return {
+      pageId: Number(value.pageId),
+    }
+  }),
+  async (c) => {
+    const { pageId } = c.req.valid('query')
+    const token = await getPageShareToken(c.env.DB, pageId)
+    return c.json(result.success({ token }))
+  },
+)
+
+app.post(
+  '/share',
+  validator('json', (value, c) => {
+    const schema = z.object({
+      pageId: z.number({ message: 'Page ID should be a number' }),
+    })
+    const parsed = schema.safeParse(value)
+    if (!parsed.success) {
+      return c.json(result.error(400, parsed.error.errors[0]?.message || 'Invalid request'))
+    }
+    return parsed.data
+  }),
+  async (c) => {
+    const { pageId } = c.req.valid('json')
+    const page = await getPageById(c.env.DB, { id: pageId, isDeleted: false })
+    if (isNil(page)) {
+      return c.json(result.error(404, 'Page not found'))
+    }
+    const token = await createOrGetPageShareToken(c.env.DB, pageId)
+    return c.json(result.success({ token }))
+  },
+)
+
+app.delete(
+  '/share',
+  validator('query', (value, c) => {
+    if (isNil(value.pageId) || !isNumberString(value.pageId)) {
+      return c.json(result.error(400, 'Page ID is required and should be a number'))
+    }
+    return {
+      pageId: Number(value.pageId),
+    }
+  }),
+  async (c) => {
+    const { pageId } = c.req.valid('query')
+    await revokePageShareToken(c.env.DB, pageId)
+    return c.json(result.success(true))
   },
 )
 

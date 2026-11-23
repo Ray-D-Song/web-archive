@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import IframePageContent from '~/components/iframe-page-content'
 import LoadingWrapper from '~/components/loading-wrapper'
 import ReadabilityPageContent from '~/components/readability-page-content'
+import SharePagePopover from '~/components/share-page-popover'
 import { deletePage, getPageDetail } from '~/data/page'
 import { useObjectURL } from '~/hooks/useObjectUrl'
 import { useNavigate, useParams } from '~/router'
@@ -94,6 +95,9 @@ function ArchivePage() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="flex space-x-2">
+          {pageDetail && (
+            <SharePagePopover pageId={pageDetail.id} variant="outline" size="sm" />
+          )}
           <a
             href={pageContentUrl ?? ''}
             download={`${pageDetail?.title ?? 'Download'}.html`}

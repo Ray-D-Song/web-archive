@@ -95,5 +95,11 @@
   "model-name-is-required": "请输入模型名称",
   "please-enter-a-valid-api-url": "请输入有效的 API URL",
   "select-generate-tag-language": "选择生成标签的语言",
-  "select-service-type": "选择服务类型"
+  "select-service-type": "选择服务类型",
+  "share-page": "分享页面",
+  "copy-link": "复制链接",
+  "share-link-copied": "分享链接已复制到剪贴板",
+  "cancel-share": "取消分享",
+  "share-revoked": "已取消分享",
+  "generating-share-link": "正在生成分享链接..."
 }

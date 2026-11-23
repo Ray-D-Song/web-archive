@@ -114,6 +114,33 @@ function queryAllPageIds(folderId: number): Promise<number[]> {
   })
 }
 
+function getPageShareToken(pageId: number): Promise<{ token: string | null }> {
+  return fetcher<{ token: string | null }>('/pages/share', {
+    method: 'GET',
+    query: {
+      pageId: String(pageId),
+    },
+  })
+}
+
+function createPageShareToken(pageId: number): Promise<{ token: string }> {
+  return fetcher<{ token: string }>('/pages/share', {
+    method: 'POST',
+    body: {
+      pageId,
+    },
+  })
+}
+
+function revokePageShareToken(pageId: number): Promise<boolean> {
+  return fetcher<boolean>('/pages/share', {
+    method: 'DELETE',
+    query: {
+      pageId: String(pageId),
+    },
+  })
+}
+
 export {
   getPageDetail,
   deletePage,
@@ -126,4 +153,7 @@ export {
   getPageScreenshot,
   getRecentSavePage,
   queryAllPageIds,
+  getPageShareToken,
+  createPageShareToken,
+  revokePageShareToken,
 }

@@ -95,5 +95,11 @@
   "ai-tag-config-saved": "AI Tag config saved",
   "select-service-type": "Select Service Type",
   "select-generate-tag-language": "Select Generate Tag Language",
-  "model": "Model"
+  "model": "Model",
+  "share-page": "Share Page",
+  "copy-link": "Copy Link",
+  "share-link-copied": "Share link copied to clipboard",
+  "cancel-share": "Stop Sharing",
+  "share-revoked": "Sharing stopped",
+  "generating-share-link": "Generating share link..."
 }

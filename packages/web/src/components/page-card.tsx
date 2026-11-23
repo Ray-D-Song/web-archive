@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import ScreenshotView from './screenshot-view'
 import { updatePageShowcase } from '~/data/page'
 import CardEditDialog from '~/components/card-edit-dialog'
+import SharePagePopover from '~/components/share-page-popover'
 import TagContext from '~/store/tag'
 import { Link } from '~/router'
 
@@ -92,22 +93,25 @@ function Comp({ page, onPageDelete }: { page: Page, onPageDelete?: (page: Page) 
         <CardFooter className="flex space-x-2 justify-end w-full backdrop-blur-sm py-4 absolute bottom-0 group-hover:opacity-100 sm:opacity-0 transition-opacity">
           {
             !isShowcased && (
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleEditPage}
-                    >
-                      <SquarePen className="w-5 h-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t('edit-page')}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <>
+                <SharePagePopover pageId={page.id} variant="outline" size="sm" />
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleEditPage}
+                      >
+                        <SquarePen className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t('edit-page')}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </>
             )
           }
 

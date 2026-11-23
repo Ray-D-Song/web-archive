@@ -82,6 +82,58 @@ async function setAITagConfig(DB: D1Database, config: AITagConfig): Promise<bool
   return result.success
 }
 
+function getSharePageKey(pageId: number) {
+  return `share/page/${pageId}`
+}
+
+function getShareTokenKey(token: string) {
+  return `share/token/${token}`
+}
+
+async function getPageShareToken(DB: D1Database, pageId: number): Promise<string | null> {
+  const result = await DB.prepare(`SELECT value FROM stores WHERE key = ?`).bind(getSharePageKey(pageId)).first<{ value: string }>()
+  return result?.value ?? null
+}
+
+async function createOrGetPageShareToken(DB: D1Database, pageId: number): Promise<string> {
+  const existingToken = await getPageShareToken(DB, pageId)
+  if (existingToken) {
+    return existingToken
+  }
+  const token = crypto.randomUUID().replace(/-/g, '')
+  const upsertSql = `INSERT INTO stores (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+  const results = await DB.batch([
+    DB.prepare(upsertSql).bind(getSharePageKey(pageId), token),
+    DB.prepare(upsertSql).bind(getShareTokenKey(token), String(pageId)),
+  ])
+  if (results.some(r => !r.success)) {
+    throw new Error('Failed to create share token')
+  }
+  return token
+}
+
+async function revokePageShareToken(DB: D1Database, pageId: number): Promise<boolean> {
+  const existingToken = await getPageShareToken(DB, pageId)
+  if (!existingToken) {
+    return true
+  }
+  const deleteSql = `DELETE FROM stores WHERE key = ?`
+  const results = await DB.batch([
+    DB.prepare(deleteSql).bind(getSharePageKey(pageId)),
+    DB.prepare(deleteSql).bind(getShareTokenKey(existingToken)),
+  ])
+  return results.every(r => r.success)
+}
+
+async function getSharedPageIdByToken(DB: D1Database, token: string): Promise<number | null> {
+  const result = await DB.prepare(`SELECT value FROM stores WHERE key = ?`).bind(getShareTokenKey(token)).first<{ value: string }>()
+  if (!result?.value) {
+    return null
+  }
+  const id = Number(result.value)
+  return Number.isNaN(id) ? null : id
+}
+
 export {
   checkAdminExist,
   verifyAdminToken,
@@ -90,4 +142,8 @@ export {
   setShouldShowRecent,
   getAITagConfig,
   setAITagConfig,
+  getPageShareToken,
+  createOrGetPageShareToken,
+  revokePageShareToken,
+  getSharedPageIdByToken,
 }
