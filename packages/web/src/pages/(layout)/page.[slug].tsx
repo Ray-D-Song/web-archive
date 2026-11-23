@@ -49,10 +49,12 @@ function ArchivePage() {
   )
 
   const goBack = () => {
-    if (pageDetail)
-      navigate('/folder/:slug', { params: { slug: String(pageDetail?.folderId) } })
-    else
+    if (window.history.state && typeof window.history.state.idx === 'number' && window.history.state.idx > 0)
       window.history.back()
+    else if (pageDetail)
+      navigate('/folder/:slug', { params: { slug: String(pageDetail.folderId) } })
+    else
+      navigate('/')
   }
 
   const { objectURL: pageContentUrl, setObject } = useObjectURL(null)

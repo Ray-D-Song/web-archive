@@ -37,8 +37,8 @@ function ShowcaseFolderPage() {
 
   return (
     <div className="flex flex-col flex-1">
-      <PoweredBy />
-      <ScrollArea ref={scrollRef} className="p-4 overflow-auto h-[calc(100vh-84px)]">
+      <PoweredBy className="m-2 self-end" />
+      <ScrollArea ref={scrollRef} className="p-4 overflow-auto h-[calc(100vh-52px)]">
         <LoadingWrapper loading={pagesLoading || (!pagesData)}>
           <div className="h-full">
             <EmptyWrapper empty={pagesData?.list.length === 0}>

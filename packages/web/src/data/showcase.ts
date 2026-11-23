@@ -26,4 +26,13 @@ function getNextShowcasePageId(pageId: number) {
   })
 }
 
-export { queryShowcase, getNextShowcasePageId }
+function getShowcaseDetail(pageId?: string): Promise<Page> {
+  return fetcher<Page>('/showcase/detail', {
+    method: 'GET',
+    query: {
+      id: pageId,
+    },
+  })
+}
+
+export { queryShowcase, getNextShowcasePageId, getShowcaseDetail }
